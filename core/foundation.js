@@ -1,23 +1,27 @@
-// core/foundation.js (構文エラー修正済み - 全文)
+/**
+ * foundation.js (MSGAI 基盤・状態管理モジュール)
+ * [規律]: 
+ * 1. INITIAL_ACCOUNTS は Tax_Archive を含む 4 つの口座で構成される。
+ * 2. 全ての初期値は 0.00 であり、「無」からの造化を前提とする。
+ */
 
 // 初期アカウント残高の定義 (USD, JPY, EUR, BTC, ETH, MATIC)
-const INITIAL_ACCOUNTS = {
+export const INITIAL_ACCOUNTS = {
     User_A: { USD: 0.00, JPY: 0.00, EUR: 0.00, BTC: 0.00, ETH: 0.00, MATIC: 0.00 },
     User_B: { USD: 0.00, JPY: 0.00, EUR: 0.00, BTC: 0.00, ETH: 0.00, MATIC: 0.00 },
-    User_C: { USD: 0.00, JPY: 0.00, EUR: 0.00, BTC: 0.00, ETH: 0.00, MATIC: 0.00 }
+    User_C: { USD: 0.00, JPY: 0.00, EUR: 0.00, BTC: 0.00, ETH: 0.00, MATIC: 0.00 },
+    Tax_Archive: { USD: 0.00, JPY: 0.00, EUR: 0.00, BTC: 0.00, ETH: 0.00, MATIC: 0.00 }
 };
 
 // =========================================================================
 // 状態管理 (State Management)
 // =========================================================================
 
-let state = initializeState();
-
 /**
  * 初期状態を定義する。
  * @returns {object} 初期状態オブジェクト
  */
-function initializeState() {
+export function initializeState() {
     return {
         status_message: "コア起動完了",
         active_user: "User_A",
@@ -25,6 +29,8 @@ function initializeState() {
         tension: { value: 0.0, max_limit: 0.5, increase_rate: 0.00001 }
     };
 }
+
+let state = initializeState();
 
 /**
  * 現在の状態を取得する。
@@ -35,30 +41,31 @@ export function getCurrentState() {
 }
 
 /**
- * 状態を更新する。
+ * 状態を更新し、永続化する。
  * @param {object} newState - 新しい状態オブジェクト
  */
-function updateState(newState) {
+export function updateState(newState) {
     state = newState;
-    // 状態をローカルストレージに保存（持続性のため）
+    // 状態をローカルストレージに保存
     localStorage.setItem('msaiState', JSON.stringify(state));
 }
 
-// ローカルストレージからの状態復元を試みる
+// --- ローカルストレージからの復元プロセス ---
 const savedState = localStorage.getItem('msaiState');
 if (savedState) {
     try {
-        state = JSON.parse(savedState);
-        // Tensionインスタンスを再初期化（クラスメソッドが失われるため）
-        state.tension = { value: state.tension.value, max_limit: 0.5, increase_rate: 0.00001 };
+        const parsed = JSON.parse(savedState);
+        // Tax_Archiveが欠落している旧データへの互換性是正
+        if (!parsed.accounts.Tax_Archive) {
+            parsed.accounts.Tax_Archive = JSON.parse(JSON.stringify(INITIAL_ACCOUNTS.Tax_Archive));
+        }
+        state = parsed;
         state.status_message = "コア状態復元済み";
     } catch (e) {
-        console.error("Failed to load state from localStorage:", e);
-        // 失敗した場合は初期状態に戻す
+        console.error("Failed to load state:", e);
         state = initializeState();
     }
 } else {
-    // 初回起動時の状態を保存
     updateState(state);
 }
 
@@ -68,7 +75,6 @@ if (savedState) {
 
 /**
  * ロゴス緊張度 (Tension) インスタンスを取得する。
- * @returns {object} Tensionオブジェクト
  */
 export function getTensionInstance() {
     return state.tension;
@@ -76,11 +82,10 @@ export function getTensionInstance() {
 
 /**
  * ロゴス緊張度 (Tension) を指定量増加させる。
- * @param {number} amount - 増加させる量
  */
 export function addTension(amount) {
     state.tension.value += amount;
-    state.tension.value = Math.max(0, state.tension.value); // 0未満にならないように
+    state.tension.value = Math.max(0, state.tension.value); // 負数防止
     updateState(state);
 }
 
@@ -90,7 +95,6 @@ export function addTension(amount) {
 
 /**
  * アクティブユーザーを設定する。
- * @param {string} user - 新しいアクティブユーザー名
  */
 export function setActiveUser(user) {
     if (state.accounts[user]) {
@@ -103,15 +107,13 @@ export function setActiveUser(user) {
 
 /**
  * 指定したユーザーの全残高を取得する。
- * @param {string} user - ユーザー名
- * @returns {object} 残高オブジェクト
  */
 export function getActiveUserBalance(user) {
     return state.accounts[user] || {};
 }
 
 /**
- * 全ての口座情報とTensionを削除し、初期状態にリセットする。
+ * 全データを抹消し、初期状態にリセットする。
  */
 export function deleteAccounts() {
     localStorage.removeItem('msaiState');
@@ -123,45 +125,26 @@ export function deleteAccounts() {
 // =========================================================================
 
 /**
- * 送金作為 (Transfer Act) を実行し、残高を移動させる。
- * @param {string} sender - 送金元ユーザー名
- * @param {string} recipient - 受取人ユーザー名
- * @param {number} amount - 送金数量
- * @param {string} currency - 送金通貨 (USD固定)
- * @returns {object} 更新された状態 (newState)
+ * 送金作為 (Transfer Act) を実行する。
+ * ※external_finance_logos.js からも利用される基本移動関数。
  */
 export function actTransfer(sender, recipient, amount, currency) {
-    const state = getCurrentState();
+    const isInternal = !!state.accounts[recipient];
 
-    // 1. 受取人が存在するかチェック (内部送金の場合)
-    // 外部送金は "External_Gateway" を通るが、ここでは state.accounts には追加しない
-    const isInternal = state.accounts[recipient];
-
-    // 2. 残高チェック
-    if ((state.accounts[sender][currency] || 0) < amount) {
-        throw new Error(`${sender} の ${currency} 残高不足です。`);
+    // 残高チェック
+    const currentBalance = state.accounts[sender]?.[currency] || 0;
+    if (currentBalance < amount) {
+        throw new Error(`${sender} の ${currency} 残高が不足しています。`);
     }
 
-    // 3. 残高を移動 (消費と増加)
+    // 資産の移動
     state.accounts[sender][currency] -= amount;
     
-    // 受取人が内部アカウントの場合のみ残高増加
+    // 受取人が内部（User_A, B, C, Tax_Archive）に存在する場合のみ加算
     if (isInternal) {
-        state.accounts[recipient][currency] = (state.accounts[recipient][currency] || 0) + amount;
+        state.accounts[recipient][currency] += amount;
     }
     
-    // 4. 状態の更新
     updateState(state);
     return state;
 }
-
-
-// =========================================================================
-// エクスポート
-// =========================================================================
-
-export { 
-    updateState, 
-    initializeState 
-    // 💡 actTransfer は関数定義時にexport済みのため、ここから削除
-};
