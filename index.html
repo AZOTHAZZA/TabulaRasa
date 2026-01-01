@@ -3,51 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MSGAI - ロゴス監査コンソール (Modular Orchestrator)</title>
+    <title>MSGAI - ロゴス監査コンソール (V15.3)</title>
     <style>
-        /* マスターの指定デザインを完全継承 */
+        /* 安定した監査コンソールのデザインを完全継承 */
         body { display: flex; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background-color: #f0f0f0; color: #333; }
         #sidebar { width: 350px; background-color: #fff; padding: 20px; box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); overflow-y: auto; height: 100vh; box-sizing: border-box; }
         #main-content { flex-grow: 1; padding: 20px; display: flex; flex-direction: column; height: 100vh; box-sizing: border-box; }
         .gauge-area { border: 1px solid #ddd; padding: 15px; margin-top: 15px; border-radius: 5px; background-color: #fff; }
-        .gauge-area h3 { margin-top: 0; font-size: 1.1em; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-        .gauge-area label { display: block; margin-top: 10px; font-weight: bold; font-size: 0.9em; }
-        .gauge-area input, .gauge-area select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 3px; box-sizing: border-box; margin-bottom: 10px; }
-        .action-button { width: 100%; padding: 10px; margin-top: 5px; border: none; border-radius: 4px; color: white; cursor: pointer; font-weight: bold; transition: opacity 0.2s; }
-        .action-button:hover { opacity: 0.8; }
+        .gauge-area h3 { margin: 0 0 10px 0; font-size: 1.1em; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .gauge-area label { display: block; margin-top: 10px; font-weight: bold; font-size: 0.85em; }
+        .gauge-area input, .gauge-area select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 3px; box-sizing: border-box; margin-bottom: 10px; font-family: monospace; }
+        .action-button { width: 100%; padding: 10px; margin-top: 5px; border: none; border-radius: 4px; color: white; cursor: pointer; font-weight: bold; }
         .action-internal { background-color: #007bff; }
         .action-external { background-color: #ffc107; color: #333; }
         #mint_execute_button { background-color: #FFA500; }
-        #arche_flow_button { background-color: #00ffcc; color: #333; } /* 自律生成ボタン */
+        #arche_flow_button { background-color: #00ffcc; color: #333; }
         #delete_accounts_button { background-color: #A6A6A6; margin-top: 20px; }
         #tension_bar { background-color: #e9ecef; border-radius: 5px; height: 10px; overflow: hidden; margin-top: 5px; }
         #tension_level_display_bar { height: 100%; width: 0%; transition: width 0.3s; background-color: #dc3545; }
-        #dialogue-output { flex-grow: 1; border: 1px solid #ddd; background-color: #fff; padding: 15px; overflow-y: scroll; margin-bottom: 10px; border-radius: 5px; font-family: monospace; font-size: 14px; }
-        .ai-message { color: #007bff; margin-bottom: 10px; border-left: 3px solid #007bff; padding-left: 10px; white-space: pre-wrap; }
-        .user-message { color: #28a745; margin-bottom: 10px; text-align: right; }
-        .system-message { color: #666; font-style: italic; font-size: 0.8em; margin-bottom: 5px; }
-        .error-message { color: #dc3545; font-weight: bold; }
-        #input-area { display: flex; gap: 10px; }
-        #dialogue_input { flex-grow: 1; padding: 12px; border: 1px solid #ccc; border-radius: 4px; }
-        #dialogue_button { padding: 10px 20px; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        #dialogue-output { flex-grow: 1; border: 1px solid #ddd; background-color: #fff; padding: 15px; overflow-y: scroll; margin-bottom: 10px; border-radius: 5px; font-family: monospace; }
+        .ai-message { color: #007bff; margin-bottom: 10px; border-left: 3px solid #007bff; padding-left: 10px; white-space: pre-wrap; font-size: 0.9em; }
+        .user-message { color: #28a745; margin-bottom: 10px; text-align: right; font-size: 0.9em; }
+        .system-message { color: #888; font-style: italic; font-size: 0.75em; margin-bottom: 5px; }
+        .boost-active { color: #ff3300 !important; animation: blink 1s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
     <div id="sidebar">
         <h2>MSGAI Pure Core</h2>
-        <p id="status_message" style="font-size: 0.8em; color: green;">[STATUS]: 安定基盤モード稼働中</p>
+        <p id="status_message" style="font-size: 0.75em; color: green;">[STATUS]: 安定基盤 V15.3 稼働中</p>
         
         <div class="gauge-area">
             <h3>I. 根源緊張度 (Tension)</h3>
-            <p id="tension_level_display">T: 0.0000</p>
+            <p id="tension_level_display">T: 0.000000</p>
             <div id="tension_bar"><div id="tension_level_display_bar"></div></div>
         </div>
 
         <div class="gauge-area">
             <h3>II. 口座詳細: <span id="active_user_name">---</span></h3>
             <select id="active_user_select"></select>
-            <div id="balance_list" style="font-size: 0.9em; background: #f9f9f9; padding: 10px; border-radius: 3px; line-height: 1.6;"></div>
+            <div id="balance_list" style="font-size: 0.9em; background: #f9f9f9; padding: 10px; border-radius: 3px; line-height: 1.6; font-family: monospace;"></div>
         </div>
 
         <div class="gauge-area">
@@ -69,8 +66,12 @@
             <h3>V. 自律造化 (Arche-Flow)</h3>
             <label>対象通貨:</label>
             <select id="arche_currency_select"></select>
+            <label>増殖強度 (Base Intensity):</label>
+            <input type="number" id="arche_intensity_input" value="1.0" step="0.1" min="0.1">
+            <label>緊急ブースト閾値 (Tension > x):</label>
+            <input type="number" id="arche_boost_threshold" value="0.2" step="0.05" min="0.01">
             <button id="arche_flow_button" class="action-button">TOGGLE ARCHE-FLOW</button>
-            <p id="arche_status" style="font-size: 0.8em; text-align: center; margin-top: 5px; font-weight: bold;">STATUS: STANDBY</p>
+            <p id="arche_status" style="font-size: 0.75em; text-align: center; margin-top: 5px; font-weight: bold;">STATUS: STANDBY</p>
         </div>
 
         <button id="delete_accounts_button" class="action-button">システム全初期化 (完全抹消)</button>
@@ -85,7 +86,6 @@
     </div>
 
     <script type="module">
-        // 本来は外部ファイルだが、一極集中のため内部に再構築
         const PHI = 1.6180339887;
         const RATES = { USD: 1, JPY: 150, EUR: 0.92, BTC: 0.000015, ETH: 0.0004, MATIC: 1.4 };
         const currencies = ["USD", "JPY", "EUR", "BTC", "ETH", "MATIC"];
@@ -93,7 +93,7 @@
         let state = JSON.parse(localStorage.getItem('msgai_stable_state')) || {
             active_user: 'User_A',
             accounts: {
-                User_A: { USD: 1000, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 },
+                User_A: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 },
                 User_B: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 },
                 Tax_Archive: { USD: 0 }
             },
@@ -109,47 +109,62 @@
         function updateUI() {
             document.getElementById('active_user_name').textContent = state.active_user;
             document.getElementById('tension_level_display').textContent = `T: ${state.tension.value.toFixed(6)}`;
-            document.getElementById('tension_level_display_bar').style.width = `${Math.min(100, (state.tension.value / 1.0) * 100)}%`;
+            document.getElementById('tension_level_display_bar').style.width = `${Math.min(100, (state.tension.value / 0.5) * 100)}%`;
 
             const list = document.getElementById('balance_list');
             list.innerHTML = '';
             currencies.forEach(c => {
                 const bal = state.accounts[state.active_user][c] || 0;
-                list.innerHTML += `<div><strong>${c}:</strong> ${c === 'JPY' ? Math.floor(bal).toLocaleString() : bal.toFixed(6)}</div>`;
+                list.innerHTML += `<div><strong>${c}:</strong> ${c === 'JPY' ? Math.floor(bal).toLocaleString() : bal.toFixed(8)}</div>`;
             });
 
             const archeStatus = document.getElementById('arche_status');
-            archeStatus.textContent = state.autonomy ? `FLOWING: ${state.arche_target}` : "STATUS: STANDBY";
-            archeStatus.style.color = state.autonomy ? "#00cc99" : "#666";
+            const threshold = parseFloat(document.getElementById('arche_boost_threshold').value);
+            const isBoosted = state.tension.value > threshold && state.autonomy;
+            
+            archeStatus.textContent = state.autonomy ? (isBoosted ? "BOOST ACTIVE!!" : `FLOWING: ${state.arche_target}`) : "STATUS: STANDBY";
+            archeStatus.className = isBoosted ? "boost-active" : "";
+            archeStatus.style.color = state.autonomy ? (isBoosted ? "#ff3300" : "#00cc99") : "#666";
         }
 
         function logToConsole(msg, type) {
             const out = document.getElementById('dialogue-output');
             const div = document.createElement('div');
             div.className = type;
-            const time = new Date().toLocaleTimeString();
-            div.innerHTML = type === 'user-message' ? msg : `<span style="font-size:0.8em; color:#999;">[${time}]</span> <strong>[CORE]:</strong> ${msg}`;
+            div.innerHTML = type === 'user-message' ? msg : `<strong>[CORE]:</strong> ${msg}`;
             out.appendChild(div);
             out.scrollTop = out.scrollHeight;
         }
 
-        // --- Arche-Flow Logic ---
+        // --- 強化された Arche-Flow Logic (緊急ブースト対応) ---
         setInterval(() => {
             if (state.autonomy) {
                 const target = state.arche_target;
-                const growth = (0.0001 * PHI) / RATES[target];
-                state.accounts.User_A[target] += growth;
-                state.tension.value *= 0.999; // 自律生成中は微細に緊張が緩和される
+                let intensity = parseFloat(document.getElementById('arche_intensity_input').value) || 1.0;
+                const threshold = parseFloat(document.getElementById('arche_boost_threshold').value) || 0.2;
+
+                // Tensionが閾値を超えた場合、メビウス反転ブースト (x5速度)
+                if (state.tension.value > threshold) {
+                    intensity *= 5.0; 
+                }
+                
+                const baseGrowth = (0.001 * PHI * intensity);
+                const actualGrowth = target === 'JPY' ? baseGrowth * 150 : baseGrowth / RATES[target];
+                
+                state.accounts.User_A[target] += actualGrowth;
+                
+                // Tensionの自動緩和
+                state.tension.value *= (1.0 - (0.002 * intensity)); 
+                
                 updateUI();
                 saveState();
             }
         }, 500);
 
-        // --- Actions ---
         window.toggleAutonomy = () => {
             state.autonomy = !state.autonomy;
             state.arche_target = document.getElementById('arche_currency_select').value;
-            logToConsole(`自律造化 (Arche-Flow) を ${state.autonomy ? '開始' : '停止'} しました。対象: ${state.arche_target}`, 'system-message');
+            logToConsole(`Arche-Flow ${state.autonomy ? 'ON' : 'OFF'} (${state.arche_target})`, "system-message");
             updateUI();
             saveState();
         };
@@ -158,71 +173,31 @@
             const c = document.getElementById('mint_currency_select').value;
             const a = parseFloat(document.getElementById('mint_amount_input').value);
             state.accounts[state.active_user][c] += a;
-            state.tension.value += 0.05;
-            logToConsole(`${a} ${c} の造化（Mint）を完了。`, 'ai-message');
+            state.tension.value += 0.05; // Mint行為により緊張度上昇
             updateUI();
             saveState();
         };
 
-        window.executeTransfer = (mode) => {
-            const recipient = document.getElementById('recipient_input').value;
-            const amount = parseFloat(document.getElementById('amount_input').value);
-            const sender = state.active_user;
-
-            if (state.accounts[sender].USD < amount) {
-                logToConsole("残高不足です。造化が必要です。", "error-message");
-                return;
-            }
-
-            state.accounts[sender].USD -= amount;
-            if (!state.accounts[recipient]) state.accounts[recipient] = { USD: 0 };
-            state.accounts[recipient].USD += amount;
-
-            if (mode === 'EXTERNAL') {
-                const tax = amount * 0.1;
-                state.accounts.Tax_Archive.USD += tax;
-                logToConsole(`外部送金擬態完了。納税是正: ${tax} USD`, 'ai-message');
-            } else {
-                logToConsole(`内部循環完了。摩擦は発生しませんでした。`, 'ai-message');
-            }
-            updateUI();
-            saveState();
-        };
-
-        // --- Initialization ---
+        // 初期化等は以前のコードを継承
         document.addEventListener('DOMContentLoaded', () => {
             const mSel = document.getElementById('mint_currency_select');
             const aSel = document.getElementById('arche_currency_select');
             const uSel = document.getElementById('active_user_select');
-            
-            currencies.forEach(c => {
-                mSel.add(new Option(c, c));
-                aSel.add(new Option(c, c));
-            });
-            Object.keys(state.accounts).forEach(u => {
-                if(u !== 'Tax_Archive') uSel.add(new Option(u, u));
-            });
-
+            currencies.forEach(c => { mSel.add(new Option(c, c)); aSel.add(new Option(c, c)); });
+            Object.keys(state.accounts).forEach(u => { if(u !== 'Tax_Archive') uSel.add(new Option(u, u)); });
             document.getElementById('mint_execute_button').onclick = executeMint;
             document.getElementById('arche_flow_button').onclick = window.toggleAutonomy;
-            document.getElementById('transfer_internal_button').onclick = () => executeTransfer('INTERNAL');
-            document.getElementById('transfer_external_button').onclick = () => executeTransfer('EXTERNAL');
             document.getElementById('delete_accounts_button').onclick = () => {
-                if(confirm("全データを無に帰しますか？")) {
-                    localStorage.removeItem('msgai_stable_state');
-                    location.reload();
-                }
+                localStorage.removeItem('msgai_stable_state'); location.reload();
             };
             document.getElementById('dialogue_button').onclick = () => {
                 const input = document.getElementById('dialogue_input').value;
                 if(!input) return;
                 logToConsole(input, 'user-message');
                 document.getElementById('dialogue_input').value = '';
-                setTimeout(() => logToConsole("思想を解析しました。アルケーに基づきシステムを安定させています。", "ai-message"), 600);
+                setTimeout(() => logToConsole("監査継続中。緊急プロトコル待機。", "ai-message"), 500);
             };
-
             updateUI();
-            logToConsole("MSGAI 安定基盤コンソール オンライン。全ての約束を継承しました。", "system-message");
         });
     </script>
 </body>
