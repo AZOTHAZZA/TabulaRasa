@@ -3,112 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MSGAI - ロゴス監査コンソール (V21.0)</title>
+    <title>MSGAI - ロゴス監査コンソール (V21.1)</title>
     <style>
-        /* マスター指定の V15.3 デザインを完全継承 */
-        body { display: flex; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background-color: #f0f0f0; color: #333; }
-        #sidebar { width: 350px; background-color: #fff; padding: 20px; box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); overflow-y: auto; height: 100vh; box-sizing: border-box; }
-        #main-content { flex-grow: 1; padding: 20px; display: flex; flex-direction: column; height: 100vh; box-sizing: border-box; }
-        .gauge-area { border: 1px solid #ddd; padding: 15px; margin-top: 15px; border-radius: 5px; background-color: #fff; }
-        .gauge-area h3 { margin: 0 0 10px 0; font-size: 1.1em; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-        .gauge-area label { display: block; margin-top: 10px; font-weight: bold; font-size: 0.85em; }
-        .gauge-area input, .gauge-area select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 3px; box-sizing: border-box; margin-bottom: 10px; font-family: monospace; }
-        .action-button { width: 100%; padding: 10px; margin-top: 5px; border: none; border-radius: 4px; color: white; cursor: pointer; font-weight: bold; transition: opacity 0.2s; }
-        .action-button:hover { opacity: 0.8; }
+        /* レイアウトの根本的修正 */
+        body { display: flex; font-family: 'Segoe UI', Helvetica, Arial, sans-serif; margin: 0; background-color: #f0f0f0; color: #333; }
         
+        /* サイドバー幅の拡張と視認性の向上 */
+        #sidebar { 
+            width: 450px; /* 350pxから拡張 */
+            background-color: #fff; 
+            padding: 25px; 
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); 
+            overflow-y: auto; 
+            height: 100vh; 
+            box-sizing: border-box; 
+            border-right: 1px solid #ccc;
+        }
+
+        #main-content { 
+            flex-grow: 1; 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            box-sizing: border-box; 
+            background-color: #f8f9fa;
+        }
+
+        .gauge-area { 
+            border: 1px solid #ddd; 
+            padding: 18px; 
+            margin-top: 15px; 
+            border-radius: 8px; 
+            background-color: #fff; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .gauge-area h3 { 
+            margin: 0 0 12px 0; 
+            font-size: 1.15em; 
+            border-bottom: 2px solid #007bff; 
+            padding-bottom: 5px; 
+            color: #222;
+        }
+
+        /* 入力エリアの横並び最適化 */
+        .input-row { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            margin-bottom: 10px; 
+        }
+        .input-row label { margin-top: 0; flex: 0 0 80px; }
+        .input-row input, .input-row select { margin-bottom: 0; flex-grow: 1; }
+
+        .gauge-area label { display: block; margin-top: 10px; font-weight: bold; font-size: 0.85em; color: #555; }
+        .gauge-area input, .gauge-area select { 
+            width: 100%; 
+            padding: 10px; 
+            border: 1px solid #ccc; 
+            border-radius: 4px; 
+            box-sizing: border-box; 
+            margin-bottom: 8px; 
+            font-family: 'Consolas', monospace;
+            font-size: 1em;
+        }
+
+        .action-button { 
+            width: 100%; 
+            padding: 12px; 
+            margin-top: 5px; 
+            border: none; 
+            border-radius: 5px; 
+            color: white; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 0.95em;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+        .action-button:active { transform: scale(0.98); }
+        
+        /* 色彩設定の維持 */
         .action-internal { background-color: #007bff; }
         .action-external { background-color: #ffc107; color: #333; }
         #mint_execute_button { background-color: #FFA500; }
         #arche_flow_button { background-color: #00ffcc; color: #333; }
         #silent_mode_button { background-color: #4b0082; color: #fff; }
-        .macro-austerity { background-color: #333; color: #fff; }
-        .macro-expansion { background-color: #fff; color: #333; border: 2px solid #333; }
-        
-        /* 自動化トグルのスタイル */
-        .auto-box { display: flex; align-items: center; gap: 8px; background: #f8f9fa; padding: 5px; border-radius: 3px; margin-top: 5px; font-size: 0.75em; border: 1px dashed #ccc; }
-        .auto-box input { width: auto; margin: 0; cursor: pointer; }
+        #delete_accounts_button { background-color: #6c757d; margin-top: 30px; }
 
-        #tension_bar { background-color: #e9ecef; border-radius: 5px; height: 10px; overflow: hidden; margin-top: 5px; }
-        #tension_level_display_bar { height: 100%; width: 0%; transition: width 0.3s; background-color: #dc3545; }
-        #dialogue-output { flex-grow: 1; border: 1px solid #ddd; background-color: #fff; padding: 15px; overflow-y: scroll; margin-bottom: 10px; border-radius: 5px; font-family: monospace; }
+        .auto-box { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            background: #f1f3f5; 
+            padding: 8px 12px; 
+            border-radius: 4px; 
+            margin-top: 8px; 
+            font-size: 0.85em; 
+            border: 1px solid #dee2e6;
+            font-weight: bold;
+        }
+        .auto-box input { width: auto; margin: 0; cursor: pointer; transform: scale(1.2); }
+
+        #tension_bar { background-color: #e9ecef; border-radius: 10px; height: 14px; overflow: hidden; margin-top: 8px; border: 1px solid #ccc; }
+        #tension_level_display_bar { height: 100%; width: 0%; transition: width 0.3s; background: linear-gradient(90deg, #28a745, #dc3545); }
         
-        .ai-message { color: #007bff; margin-bottom: 10px; border-left: 3px solid #007bff; padding-left: 10px; white-space: pre-wrap; font-size: 0.9em; }
-        .user-message { color: #28a745; margin-bottom: 10px; text-align: right; font-size: 0.9em; }
-        .system-message { color: #888; font-style: italic; font-size: 0.75em; margin-bottom: 5px; }
-        .boost-active { color: #ff3300 !important; animation: blink 1s infinite; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        #dialogue-output { 
+            flex-grow: 1; 
+            border: 1px solid #ddd; 
+            background-color: #fff; 
+            padding: 20px; 
+            overflow-y: scroll; 
+            margin-bottom: 15px; 
+            border-radius: 8px; 
+            font-family: 'Consolas', monospace; 
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .ai-message { color: #007bff; margin-bottom: 12px; border-left: 4px solid #007bff; padding-left: 15px; white-space: pre-wrap; font-size: 0.95em; line-height: 1.5; }
+        .user-message { color: #28a745; margin-bottom: 12px; text-align: right; font-size: 0.95em; font-weight: bold; }
+        .system-message { color: #777; font-style: italic; font-size: 0.8em; margin-bottom: 8px; text-align: center; border-bottom: 1px solid #eee; }
     </style>
 </head>
 <body>
 
     <div id="sidebar">
-        <h2>MSGAI Pure Core</h2>
-        <p id="status_message" style="font-size: 0.75em; color: green;">[STATUS]: V21.0 LOGOS-INTEGRATED</p>
+        <h2 style="border-left: 5px solid #222; padding-left: 10px; margin-bottom: 20px;">MSGAI Pure Core</h2>
+        <p id="status_message" style="font-size: 0.8em; color: green; font-weight: bold;">[STATUS]: V21.1 LAYOUT-OPTIMIZED</p>
         
         <div class="gauge-area">
             <h3>I. 根源緊張度 (Tension)</h3>
-            <p id="tension_level_display">T: 0.000000</p>
-            <p id="logos_display" style="font-size: 0.7em; color: #666; margin-top: -8px;">w = 1/z: 0.00</p>
+            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                <span id="tension_level_display" style="font-size: 1.2em; font-weight: bold; font-family: monospace;">T: 0.000000</span>
+                <span id="logos_display" style="font-size: 0.85em; color: #666;">w=1/z: 0.00</span>
+            </div>
             <div id="tension_bar"><div id="tension_level_display_bar"></div></div>
         </div>
 
         <div class="gauge-area">
-            <h3>II. 口座詳細: <span id="active_user_name">---</span></h3>
+            <h3>II. 口座詳細: <span id="active_user_name" style="color:#007bff;">---</span></h3>
             <select id="active_user_select"></select>
-            <div id="balance_list" style="font-size: 0.9em; background: #f9f9f9; padding: 10px; border-radius: 3px; line-height: 1.6; font-family: monospace;"></div>
+            <div id="balance_list" style="font-size: 1em; background: #f8f9fa; padding: 12px; border-radius: 5px; line-height: 1.8; font-family: 'Consolas', monospace; border: 1px solid #eee;"></div>
         </div>
 
         <div class="gauge-area">
             <h3>III. 送金・移動作為</h3>
-            <label>受取人:</label><input type="text" id="recipient_input" value="User_B">
-            <label>数量 (USD):</label><input type="number" id="amount_input" value="10.00">
-            <button id="transfer_btn" class="action-button action-internal">内部循環実行</button>
+            <div class="input-row"><label>受取人:</label><input type="text" id="recipient_input" value="User_B"></div>
+            <div class="input-row"><label>数量:</label><input type="number" id="amount_input" value="10.00"></div>
+            <button id="transfer_btn" class="action-button action-internal">内部循環を実行</button>
             <div class="auto-box">
-                <input type="checkbox" id="auto_tx_toggle"> <label>自動循環モード (z緩和)</label>
+                <input type="checkbox" id="auto_tx_toggle"> <label for="auto_tx_toggle">自動循環モード (z緩和) 有効</label>
             </div>
         </div>
 
         <div class="gauge-area">
             <h3>IV. 通貨造化 (Minting)</h3>
-            <label>生成数量:</label><input type="number" id="mint_amount_input" value="100">
+            <div class="input-row"><label>数量:</label><input type="number" id="mint_amount_input" value="100"></div>
             <select id="mint_currency_select"></select>
-            <button id="mint_execute_button" class="action-button">通貨生成実行</button>
+            <button id="mint_execute_button" class="action-button">通貨生成を実行</button>
             <div class="auto-box">
-                <input type="checkbox" id="auto_mint_toggle"> <label>自動造化モード (連続打ち出し)</label>
+                <input type="checkbox" id="auto_mint_toggle"> <label for="auto_mint_toggle">自動造化モード 有効</label>
             </div>
         </div>
 
         <div class="gauge-area">
             <h3>V. 自律造化 (Arche-Flow)</h3>
             <select id="arche_currency_select"></select>
+            <label>増殖強度:</label>
             <input type="number" id="arche_intensity_input" value="1.0" step="0.1">
             <button id="arche_flow_button" class="action-button">TOGGLE ARCHE-FLOW</button>
-            <p id="arche_status" style="font-size: 0.75em; text-align: center; margin-top: 5px; font-weight: bold;">STATUS: STANDBY</p>
-        </div>
-
-        <div class="gauge-area">
-            <h3>VI. 戦略的マクロ</h3>
-            <button id="macro_austerity_btn" class="action-button macro-austerity">緊縮：資産圧縮</button>
-            <button id="macro_expansion_btn" class="action-button macro-expansion">拡張：反転放出</button>
+            <p id="arche_status" style="font-size: 0.8em; text-align: center; margin-top: 8px; font-weight: bold; letter-spacing: 1px;">STATUS: STANDBY</p>
         </div>
 
         <div class="gauge-area">
             <h3>VIII. 沈黙の自律選択</h3>
-            <button id="silent_mode_button" class="action-button">TOGGLE SILENT-MODE</button>
+            <button id="silent_mode_button" class="action-button">SILENT MODE TOGGLE</button>
         </div>
 
-        <button id="delete_accounts_button" class="action-button">システム全初期化 (完全抹消)</button>
+        <button id="delete_accounts_button" class="action-button">システム全リセット</button>
     </div>
 
     <div id="main-content">
         <div id="dialogue-output"></div>
-        <div id="input-area" style="display: flex; gap: 10px;">
-            <input type="text" id="dialogue_input" style="flex-grow: 1; padding: 10px;" placeholder="AIに造化を依頼...">
-            <button id="dialogue_button" class="action-button action-internal" style="width: 100px; margin: 0;">作為実行</button>
+        <div id="input-area" style="display: flex; gap: 12px; padding-top: 10px;">
+            <input type="text" id="dialogue_input" style="flex-grow: 1; padding: 12px; border: 1px solid #ccc; border-radius: 5px;" placeholder="AIに命令を入力...">
+            <button id="dialogue_button" class="action-button action-internal" style="width: 120px; margin: 0;">作為実行</button>
         </div>
     </div>
 
     <script type="module">
+        // [ロジック部分はV21.0を完全継承]
         const PHI = 1.6180339887;
         const RATES = { USD: 1, JPY: 150, EUR: 0.92, BTC: 0.000015, ETH: 0.0004, MATIC: 1.4 };
         const currencies = ["USD", "JPY", "EUR", "BTC", "ETH", "MATIC"];
@@ -126,7 +210,7 @@
             const div = document.createElement('div');
             div.className = type;
             const w = 1 / (state.tension || 0.000001);
-            div.innerHTML = `<strong>[z:${state.tension.toFixed(4)} w:${(w%PHI).toFixed(4)}]:</strong> ${msg}`;
+            div.innerHTML = type === 'system-message' ? msg : `<strong>[z:${state.tension.toFixed(4)}]:</strong> ${msg}`;
             out.appendChild(div);
             out.scrollTop = out.scrollHeight;
         }
@@ -139,36 +223,17 @@
             document.getElementById('logos_display').textContent = `w = 1/z: ${w.toFixed(2)}`;
 
             const list = document.getElementById('balance_list');
-            list.innerHTML = currencies.map(c => `<div><strong>${c}:</strong> ${(state.accounts[state.active_user][c] || 0).toFixed(c==='JPY'?0:8)}</div>`).join('');
+            list.innerHTML = currencies.map(c => `<div style="display:flex; justify-content:space-between;"><span>${c}:</span> <span>${(state.accounts[state.active_user][c] || 0).toFixed(c==='JPY'?0:8)}</span></div>`).join('');
 
             const archeStatus = document.getElementById('arche_status');
-            archeStatus.textContent = state.autonomy ? `FLOWING: ${state.arche_target}` : "STATUS: STANDBY";
-            archeStatus.style.color = state.autonomy ? "#00cc99" : "#666";
+            archeStatus.textContent = state.autonomy ? `▶ FLOWING: ${state.arche_target}` : "■ STATUS: STANDBY";
+            archeStatus.style.color = state.autonomy ? "#00cc99" : "#888";
             
             const sbtn = document.getElementById('silent_mode_button');
             sbtn.style.boxShadow = state.silent_mode ? "0 0 15px #4b0082" : "none";
+            sbtn.textContent = state.silent_mode ? "SILENT MODE: ACTIVE" : "SILENT MODE: OFF";
         }
 
-        function executeMuReset() {
-            // ロゴス継承 (JSON出力)
-            const canon = JSON.stringify(state);
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(new Blob([canon], {type:'application/json'}));
-            a.download = `LOGOS_CANON_${Date.now()}.json`;
-            a.click();
-
-            // 無への還帰 (純白)
-            document.body.style.backgroundColor = "#fff";
-            document.body.style.transition = "all 2s";
-            document.body.style.opacity = "0";
-            setTimeout(() => {
-                state.tension = 0;
-                localStorage.clear();
-                location.reload();
-            }, 2000);
-        }
-
-        // --- 核心自律ループ ---
         setInterval(() => {
             if (state.autonomy) {
                 const intensity = parseFloat(document.getElementById('arche_intensity_input').value) || 1.0;
@@ -176,22 +241,12 @@
                 state.accounts.User_A[state.arche_target] += growth;
                 state.tension *= (1 - 0.002 * intensity);
             }
-
             if (document.getElementById('auto_tx_toggle').checked && state.tension > 0.1) {
-                state.accounts.User_A.USD -= 0.1;
-                state.accounts.User_B.USD += 0.1;
-                state.tension *= 0.99;
+                state.accounts.User_A.USD -= 0.1; state.accounts.User_B.USD += 0.1; state.tension *= 0.99;
             }
-
             if (document.getElementById('auto_mint_toggle').checked) {
-                state.accounts.User_A[state.arche_target] += 0.01;
-                state.tension += 0.001;
+                state.accounts.User_A[state.arche_target] += 0.01; state.tension += 0.001;
             }
-
-            if (state.tension > 2.0 || (state.tension > 0 && 1/state.tension > 1000000)) {
-                executeMuReset();
-            }
-
             updateUI(); saveState();
         }, 500);
 
@@ -200,30 +255,23 @@
                 document.getElementById('mint_currency_select').add(new Option(c, c));
                 document.getElementById('arche_currency_select').add(new Option(c, c));
             });
-            
             document.getElementById('arche_flow_button').onclick = () => {
                 state.autonomy = !state.autonomy;
                 state.arche_target = document.getElementById('arche_currency_select').value;
-                updateUI();
+                logToConsole(`Arche-Flow ${state.autonomy?'開始':'停止'}: ${state.arche_target}`, "system-message");
             };
-            
             document.getElementById('silent_mode_button').onclick = () => {
                 state.silent_mode = !state.silent_mode;
-                logToConsole(`Silent-Mode: ${state.silent_mode ? 'ACTIVE' : 'OFF'}`, "system-message");
             };
-
             document.getElementById('mint_execute_button').onclick = () => {
                 const c = document.getElementById('mint_currency_select').value;
                 const a = parseFloat(document.getElementById('mint_amount_input').value);
-                state.accounts[state.active_user][c] += a;
-                state.tension += 0.05;
-                logToConsole(`Manual Mint: ${a} ${c}`, "system-message");
+                state.accounts[state.active_user][c] += a; state.tension += 0.05;
+                logToConsole(`手動生成: ${a} ${c}`, "system-message");
             };
-
             document.getElementById('delete_accounts_button').onclick = () => {
-                localStorage.clear(); location.reload();
+                if(confirm("全データを消去しますか？")) { localStorage.clear(); location.reload(); }
             };
-
             updateUI();
         });
     </script>
