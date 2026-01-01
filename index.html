@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MSGAI - ロゴス監査コンソール (Modular Orchestrator)</title>
+    <title>MSGAI - ロゴス監査コンソール (Solar Autonomous Version)</title>
     
     <style>
         /* UIデザイン：マスターの指定を完全継承 */
@@ -17,6 +17,7 @@
         .action-internal { background-color: #007bff; }
         .action-external { background-color: #ffc107; color: #333; }
         #mint_execute_button { background-color: #FFA500; }
+        #autonomy_toggle_button { background-color: #FF8C00; margin-top: 10px; }
         #delete_accounts_button { background-color: #A6A6A6; margin-top: 20px; }
         #tension_bar { background-color: #e9ecef; border-radius: 5px; height: 10px; overflow: hidden; }
         #tension_level_display_bar { height: 100%; width: 0%; transition: width 0.3s; background-color: #dc3545; }
@@ -28,6 +29,12 @@
         #input-area { display: flex; gap: 10px; }
         #dialogue_input { flex-grow: 1; padding: 10px; }
         #dialogue_button { padding: 10px 20px; background-color: #6c757d; color: white; border: none; border-radius: 4px; }
+        .autonomy-active { animation: pulse 1.618s infinite; }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 140, 0, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 140, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 140, 0, 0); }
+        }
     </style>
 </head>
 <body>
@@ -63,6 +70,13 @@
             <button id="mint_execute_button" class="action-button">通貨生成実行</button>
         </div>
 
+        <div class="gauge-area" id="autonomy_section" style="border-color: #FFA500; background-color: #fff9f0;">
+            <h3>V. 太陽の繁茂 (Autonomy)</h3>
+            <p id="autonomy_status">Status: 静止</p>
+            <p id="autonomy_value" style="font-size: 0.8em; color: #d2691e;">Real-time Arche: ---</p>
+            <button id="autonomy_toggle_button" class="action-button">自律繁茂モード：起動</button>
+        </div>
+
         <button id="delete_accounts_button" class="action-button">システム全初期化 (完全抹消)</button>
     </div>
 
@@ -87,7 +101,11 @@
         import { actMintCurrency } from './core/currency.js';
         import { actUniversalTransfer } from './core/external_finance_logos.js';
 
-        // グローバル公開（外部モジュールが window 経由で state に触れるようにする）
+        // 2. 追加：自律生成モジュールのインポート
+        import { solarAutonomy } from './core/Autonomy.js';
+        import { ARCHE } from './core/Arche.js';
+
+        // グローバル公開
         window.getCurrentState = getCurrentState;
         window.updateState = updateState;
         window.addTension = addTension;
@@ -132,6 +150,41 @@
         // =========================================================================
         // イベントハンドラー
         // =========================================================================
+
+        // 自律繁茂のトグル
+        let uiSyncInterval = null;
+        document.getElementById('autonomy_toggle_button').onclick = () => {
+            const isActive = solarAutonomy.isActive ? (solarAutonomy.stop(), false) : (solarAutonomy.start(), true);
+            
+            const btn = document.getElementById('autonomy_toggle_button');
+            const status = document.getElementById('autonomy_status');
+            const section = document.getElementById('autonomy_section');
+
+            if (isActive) {
+                btn.textContent = "自律繁茂モード：停止";
+                status.textContent = "Status: 繁茂中 (PHI-Growth)";
+                section.classList.add('autonomy-active');
+                logToConsole("太陽の自律繁茂プロトコルが起動しました。数理が価値を生成します。", "system-message");
+                
+                // UIへのリアルタイム同期
+                uiSyncInterval = setInterval(() => {
+                    const val = solarAutonomy.getCurrentValue();
+                    document.getElementById('autonomy_value').textContent = `Real-time Arche: ${val.toFixed(4)}`;
+                    
+                    // 現在のユーザーのUSDに繁茂を反映
+                    const state = getCurrentState();
+                    state.accounts[state.active_user]["USD"] = val;
+                    updateState(state);
+                    updateUI();
+                }, 100);
+            } else {
+                btn.textContent = "自律繁茂モード：起動";
+                status.textContent = "Status: 静止";
+                section.classList.remove('autonomy-active');
+                clearInterval(uiSyncInterval);
+                logToConsole("自律繁茂プロトコルを停止しました。", "system-message");
+            }
+        };
 
         // 送金実行
         async function runTransfer(mode) {
@@ -178,10 +231,9 @@
             logToConsole(input, 'user-message');
             document.getElementById('dialogue_input').value = '';
             
-            // 簡易対話エンジン
             setTimeout(() => {
-                let response = "解析中... 為替交換や送金の具体的な数値を指示してください。";
-                if(input.includes("造化") || input.includes("生成")) response = "造化プロトコルはサイドバーから実行可能です。";
+                let response = "解析中... 黄金比に基づく自律生成が有効です。";
+                if(input.includes("太陽")) response = "太陽の下にあるものは全て肯定されます。数理的沈黙をお楽しみください。";
                 logToConsole(response, 'ai-message');
             }, 500);
         };
@@ -208,7 +260,7 @@
             const mSel = document.getElementById('mint_currency_select');
             currencies.forEach(c => mSel.add(new Option(c, c)));
             updateUI();
-            logToConsole("MSGAI Orchestrator オンライン。モジュール分離構造を確認。", "system-message");
+            logToConsole("MSGAI Orchestrator オンライン。太陽の自律繁茂モジュールを確認。", "system-message");
         });
     </script>
 </body>
