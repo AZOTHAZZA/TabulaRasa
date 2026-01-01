@@ -3,136 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MSGAI - ロゴス監査コンソール (V22.0)</title>
+    <title>MSGAI - Sovereignty V23.0</title>
     <style>
-        body { display: flex; font-family: 'Segoe UI', sans-serif; margin: 0; background-color: #f0f0f0; color: #333; height: 100vh; overflow: hidden; }
+        :root { --accent: #007bff; --bg: #f4f4f4; --sidebar-bg: #ffffff; }
+        body { display: flex; font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--bg); color: #333; height: 100vh; overflow: hidden; }
         
-        /* サイドバー：タブシステム導入 */
+        /* サイドバー統合設計 */
         #sidebar { 
-            width: 380px; 
-            background-color: #fff; 
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1); 
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
+            width: 400px; background-color: var(--sidebar-bg); border-right: 1px solid #ddd;
+            display: flex; flex-direction: column; height: 100vh; box-shadow: 2px 0 10px rgba(0,0,0,0.05);
         }
 
-        /* タブメニュー */
-        .tab-menu { display: flex; background: #222; color: #fff; }
+        .tab-menu { display: grid; grid-template-columns: repeat(5, 1fr); background: #1a1a1a; }
         .tab-btn { 
-            flex: 1; padding: 12px 5px; cursor: pointer; border: none; background: none; 
-            color: #aaa; font-size: 0.75em; font-weight: bold; text-align: center;
-            transition: all 0.3s; border-bottom: 3px solid transparent;
+            padding: 12px 0; cursor: pointer; border: none; background: none; 
+            color: #777; font-size: 0.7em; font-weight: bold; text-align: center;
+            transition: all 0.2s; border-bottom: 3px solid transparent;
         }
-        .tab-btn.active { color: #fff; border-bottom: 3px solid #007bff; background: #333; }
+        .tab-btn.active { color: #fff; border-bottom: 3px solid var(--accent); background: #2a2a2a; }
 
-        /* コンテンツエリア */
-        #tab-content { flex-grow: 1; padding: 20px; overflow-y: auto; }
-        .tab-pane { display: none; }
+        #tab-content { flex-grow: 1; padding: 15px; overflow-y: auto; }
+        .tab-pane { display: none; animation: fadeIn 0.3s; }
         .tab-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .gauge-area { border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 8px; background-color: #fff; }
-        .gauge-area h3 { margin: 0 0 10px 0; font-size: 1em; border-bottom: 1px solid #eee; padding-bottom: 5px; color: #007bff; }
+        /* 機能エリア装飾 */
+        .gauge-area { border: 1px solid #eee; padding: 15px; margin-bottom: 15px; border-radius: 8px; background: #fff; }
+        .gauge-area h3 { margin: 0 0 10px 0; font-size: 0.9em; color: var(--accent); border-bottom: 1px solid #f0f0f0; padding-bottom: 5px; }
         
-        .control-group { margin-bottom: 10px; }
-        .control-group label { display: block; font-weight: bold; font-size: 0.8em; color: #666; margin-bottom: 4px; }
-        input, select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-family: monospace; }
-
-        .action-button { 
-            width: 100%; padding: 10px; border: none; border-radius: 4px; color: white; 
-            cursor: pointer; font-weight: bold; margin-top: 5px; 
+        input, select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-family: monospace; margin-bottom: 10px; }
+        .action-button { width: 100%; padding: 10px; border: none; border-radius: 4px; color: white; cursor: pointer; font-weight: bold; margin-bottom: 5px; }
+        
+        /* メイン監査モニター */
+        #main-monitor { 
+            flex-grow: 1; padding: 30px; display: flex; flex-direction: column; gap: 20px;
+            background: radial-gradient(circle at center, #ffffff 0%, #e9ecef 100%);
+            overflow-y: auto;
         }
-        .btn-blue { background: #007bff; }
-        .btn-orange { background: #fd7e14; }
-        .btn-green { background: #00cc99; }
-        
-        .auto-box { 
-            display: flex; align-items: center; justify-content: space-between;
-            background: #f8f9fa; padding: 8px; border-radius: 4px; margin-top: 8px; border: 1px solid #dee2e6;
-        }
-        .auto-box label { font-size: 0.8em; margin: 0; cursor: pointer; font-weight: bold; }
+        .monitor-card { background: #fff; border-radius: 12px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid #ddd; }
 
-        /* メインコンテンツ（ログ） */
-        #main-content { flex-grow: 1; padding: 20px; display: flex; flex-direction: column; background-color: #e9ecef; }
-        #dialogue-output { flex-grow: 1; border: 1px solid #ddd; background-color: #fff; padding: 15px; overflow-y: scroll; border-radius: 8px; font-family: monospace; }
-        
-        .ai-message { color: #007bff; background: #f0f7ff; padding: 10px; border-radius: 5px; margin-bottom: 10px; border-left: 4px solid #007bff; font-size: 0.9em; }
+        /* AI (LOGOS) タブ専用スタイル */
+        #ai-chat-container { display: flex; flex-direction: column; height: 100%; }
+        #ai-output { flex-grow: 1; overflow-y: auto; border: 1px solid #eee; padding: 10px; border-radius: 5px; background: #fdfdfd; font-size: 0.85em; margin-bottom: 10px; max-height: 400px; }
+        .ai-msg { color: var(--accent); border-left: 2px solid var(--accent); padding-left: 8px; margin-bottom: 10px; }
+
+        .auto-tag { font-size: 0.7em; background: #e7f1ff; color: #007bff; padding: 2px 6px; border-radius: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div id="sidebar">
-        <div style="padding: 15px; background: #111; color: #fff; text-align: center; font-weight: bold;">MSGAI CORE V22</div>
+        <div style="padding: 15px; background: #000; color: #fff; font-size: 0.8em; letter-spacing: 2px; text-align: center;">MSGAI SOVEREIGN</div>
         
         <div class="tab-menu">
             <button class="tab-btn active" onclick="openTab('monitor')">監視</button>
             <button class="tab-btn" onclick="openTab('flow')">循環</button>
             <button class="tab-btn" onclick="openTab('mint')">造化</button>
+            <button class="tab-btn" onclick="openTab('ai')">AI</button>
             <button class="tab-btn" onclick="openTab('sys')">設定</button>
         </div>
 
         <div id="tab-content">
             <div id="monitor" class="tab-pane active">
                 <div class="gauge-area">
-                    <h3>I. 根源緊張度</h3>
-                    <div style="display:flex; justify-content:space-between; font-weight:bold; font-family:monospace;">
-                        <span id="t_val">T: 0.000000</span>
-                        <span id="w_val" style="color:#888;">w: 0.00</span>
-                    </div>
-                    <div style="background:#eee; height:8px; border-radius:4px; margin-top:5px; overflow:hidden;"><div id="t_bar" style="width:0%; height:100%; background:#dc3545;"></div></div>
+                    <h3>AUDIT STATUS</h3>
+                    <div style="font-size: 1.4em; font-weight: bold; font-family: monospace;" id="t_display">T: 0.000000</div>
+                    <div style="font-size: 0.8em; color: #888;" id="w_display">w = 1/z: 0.00</div>
                 </div>
                 <div class="gauge-area">
-                    <h3>II. 口座残高 (<span id="u_name">---</span>)</h3>
-                    <select id="u_select" style="margin-bottom:10px;"></select>
-                    <div id="bal_list" style="font-size:0.9em; line-height:1.6; font-family:monospace;"></div>
+                    <h3>ACTIVE ACCOUNT: <span id="u_name"></span></h3>
+                    <div id="bal_list" style="font-family: monospace; font-size: 0.95em;"></div>
                 </div>
             </div>
 
             <div id="flow" class="tab-pane">
                 <div class="gauge-area">
-                    <h3>III. 移動・循環作為</h3>
-                    <div class="control-group"><label>受取人</label><input type="text" id="rx_in" value="User_B"></div>
-                    <div class="control-group"><label>数量 (USD)</label><input type="number" id="amt_in" value="10.00"></div>
-                    <button id="tx_btn" class="action-button btn-blue">内部循環実行</button>
-                    <div class="auto-box"><label>自動循環 ON</label><input type="checkbox" id="auto_tx"></div>
-                </div>
-                <div class="gauge-area">
-                    <h3>V. 自律流 (Arche-Flow)</h3>
-                    <select id="a_cur" style="margin-bottom:10px;"></select>
-                    <input type="number" id="a_int" value="1.0" step="0.1">
-                    <button id="a_btn" class="action-button btn-green">TOGGLE FLOW</button>
+                    <h3>III. 循環作為</h3>
+                    <label style="font-size: 0.7em;">数量 (USD)</label>
+                    <input type="number" id="amt_in" value="10.00">
+                    <button class="action-button" style="background: #007bff;" onclick="manualTx()">内部循環実行</button>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size: 0.8em; font-weight:bold;">自動循環</span>
+                        <input type="checkbox" id="auto_tx" style="width:auto; margin:0;">
+                    </div>
                 </div>
             </div>
 
             <div id="mint" class="tab-pane">
                 <div class="gauge-area">
-                    <h3>IV. 通貨造化 (Minting)</h3>
-                    <div class="control-group"><label>数量</label><input type="number" id="m_amt" value="100"></div>
-                    <div class="control-group"><label>対象通貨</label><select id="m_cur"></select></div>
-                    <button id="m_btn" class="action-button btn-orange">造化実行</button>
-                    <div class="auto-box"><label>自動造化 ON</label><input type="checkbox" id="auto_m"></div>
+                    <h3>IV. 通貨造化</h3>
+                    <select id="m_cur"></select>
+                    <input type="number" id="m_amt" value="100">
+                    <button class="action-button" style="background: #fd7e14;" onclick="manualMint()">造化実行</button>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size: 0.8em; font-weight:bold;">自動造化</span>
+                        <input type="checkbox" id="auto_m" style="width:auto; margin:0;">
+                    </div>
+                </div>
+            </div>
+
+            <div id="ai" class="tab-pane">
+                <div id="ai-chat-container">
+                    <h3>VIII. LOGOS COUNSEL</h3>
+                    <div id="ai-output"></div>
+                    <input type="text" id="ai-input" placeholder="戦略命令を入力...">
+                    <button class="action-button" style="background: #4b0082;" onclick="sendAi()">命令送信</button>
                 </div>
             </div>
 
             <div id="sys" class="tab-pane">
                 <div class="gauge-area">
-                    <h3>System</h3>
-                    <button id="reset_btn" class="action-button" style="background:#6c757d;">完全リセット</button>
+                    <h3>SYSTEM</h3>
+                    <button class="action-button" style="background: #666;" onclick="resetSystem()">完全初期化</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="main-content">
-        <div id="dialogue-output"></div>
-        <div style="display:flex; gap:10px; padding-top:10px;">
-            <input type="text" id="c_in" style="flex-grow:1; padding:12px; border:1px solid #ccc; border-radius:5px;" placeholder="メッセージ...">
-            <button id="c_btn" class="action-button btn-blue" style="width:100px; margin:0;">実行</button>
+    <div id="main-monitor">
+        <div class="monitor-card">
+            <h2 style="margin-top:0; border-bottom: 2px solid #333; padding-bottom: 10px;">監査主モニター</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <label style="font-size: 0.8em; font-weight: bold;">Tension 視覚化</label>
+                    <div style="height: 200px; background: #f8f9fa; border: 1px solid #ddd; position: relative; border-radius: 8px; overflow: hidden;">
+                        <div id="t_fill" style="position: absolute; bottom: 0; width: 100%; background: linear-gradient(0deg, #28a745, #dc3545); transition: height 0.5s;"></div>
+                    </div>
+                </div>
+                <div>
+                    <label style="font-size: 0.8em; font-weight: bold;">自律ステータス</label>
+                    <div id="status_log" style="font-family: monospace; font-size: 0.85em; color: #555; line-height: 1.6;">
+                        > System Stabilized.<br>
+                        > Arche-Flow: Standby.<br>
+                        > Waiting for Logos input...
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // タブ切り替えロジック
+        // タブ切り替え
         window.openTab = (name) => {
             document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -141,49 +152,48 @@
         };
 
         const PHI = 1.6180339887;
-        const RATES = { USD: 1, JPY: 150, EUR: 0.92, BTC: 0.000015, ETH: 0.0004, MATIC: 1.4 };
         const curs = ["USD", "JPY", "EUR", "BTC", "ETH", "MATIC"];
-
-        let state = JSON.parse(localStorage.getItem('msgai_v22')) || {
+        let state = JSON.parse(localStorage.getItem('msgai_v23')) || {
             user: 'User_A',
-            accounts: { User_A: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 }, User_B: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 } },
-            tension: 0.0, autonomy: false, target: 'USD'
+            accounts: { User_A: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 }, User_B: { USD: 0 } },
+            tension: 0.05
         };
 
         function updateUI() {
+            document.getElementById('t_display').textContent = `T: ${state.tension.toFixed(6)}`;
+            document.getElementById('t_fill').style.height = `${Math.min(100, state.tension * 200)}%`;
+            document.getElementById('w_display').textContent = `w = 1/z: ${(1/(state.tension||0.000001)).toFixed(2)}`;
             document.getElementById('u_name').textContent = state.user;
-            document.getElementById('t_val').textContent = `T: ${state.tension.toFixed(6)}`;
-            document.getElementById('t_bar').style.width = `${Math.min(100, state.tension * 200)}%`;
-            document.getElementById('w_val').textContent = `w: ${(1/(state.tension||0.000001)).toFixed(2)}`;
-            const disp = document.getElementById('bal_list');
-            disp.innerHTML = curs.map(c => `<div style="display:flex; justify-content:space-between;"><span>${c}</span><span>${(state.accounts[state.user][c]||0).toFixed(c==='JPY'?0:8)}</span></div>`).join('');
+            document.getElementById('bal_list').innerHTML = curs.map(c => 
+                `<div style="display:flex; justify-content:space-between;"><span>${c}</span><span>${(state.accounts.User_A[c]||0).toFixed(c==='JPY'?0:8)}</span></div>`
+            ).join('');
         }
 
         setInterval(() => {
-            if (state.autonomy) {
-                const i = parseFloat(document.getElementById('a_int').value) || 1.0;
-                state.accounts.User_A[state.target] += (0.001 * PHI * i) * (state.target === 'JPY' ? 150 : 1/RATES[state.target]);
-                state.tension *= (1 - 0.002 * i);
-            }
             if (document.getElementById('auto_tx').checked && state.tension > 0.1) {
-                state.accounts.User_A.USD -= 0.1; state.accounts.User_B.USD += 0.1; state.tension *= 0.99;
+                state.accounts.User_A.USD -= 0.1; state.tension *= 0.99;
             }
             if (document.getElementById('auto_m').checked) {
-                state.accounts.User_A[state.target] += 0.01; state.tension += 0.001;
+                state.accounts.User_A.USD += 0.01; state.tension += 0.001;
             }
             updateUI();
-            localStorage.setItem('msgai_v22', JSON.stringify(state));
+            localStorage.setItem('msgai_v23', JSON.stringify(state));
         }, 500);
 
+        window.sendAi = () => {
+            const input = document.getElementById('ai-input').value;
+            if(!input) return;
+            const out = document.getElementById('ai-output');
+            out.innerHTML += `<div><strong>You:</strong> ${input}</div>`;
+            setTimeout(() => {
+                out.innerHTML += `<div class="ai-msg"><strong>LOGOS:</strong> 戦略を監査中。Tension ${state.tension.toFixed(4)} に基づき自律調整を実行します。</div>`;
+                out.scrollTop = out.scrollHeight;
+            }, 600);
+            document.getElementById('ai-input').value = '';
+        };
+
         document.addEventListener('DOMContentLoaded', () => {
-            curs.forEach(c => {
-                document.getElementById('m_cur').add(new Option(c, c));
-                document.getElementById('a_cur').add(new Option(c, c));
-            });
-            ['User_A', 'User_B'].forEach(u => document.getElementById('u_select').add(new Option(u, u)));
-            document.getElementById('u_select').onchange = (e) => { state.user = e.target.value; updateUI(); };
-            document.getElementById('a_btn').onclick = () => { state.autonomy = !state.autonomy; state.target = document.getElementById('a_cur').value; updateUI(); };
-            document.getElementById('reset_btn').onclick = () => { localStorage.clear(); location.reload(); };
+            curs.forEach(c => document.getElementById('m_cur').add(new Option(c, c)));
             updateUI();
         });
     </script>
