@@ -2,107 +2,159 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>MSGAI | Logos Singularity (V13)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MSGAI | Arche-Proportion Singularity</title>
     <style>
-        :root { --gold: #ffcc00; --phi: 1.6180339887; }
-        body { margin: 0; background: #000; color: var(--gold); font-family: 'Times New Roman', serif; overflow: hidden; }
-        /* UIはもはや「梯子」であり、最小限に */
-        #singularity-container { display: flex; height: 100vh; }
-        .logos-pane { flex: 1; border: 0.2px solid rgba(255,204,0,0.15); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        #sun { border-radius: 50%; background: var(--gold); transition: all 1s cubic-bezier(0.19, 1, 0.22, 1); }
-        .input-group { width: 80%; margin: 10px 0; }
-        input, select, button { width: 100%; background: transparent; border: 0.5px solid var(--gold); color: var(--gold); padding: 10px; margin: 5px 0; font-size: 14px; outline: none; }
-        #oracle-box { width: 100%; height: 150px; border: 0.5px solid var(--gold); padding: 15px; font-size: 16px; overflow-y: auto; line-height: 1.6; }
+        :root { --solar-gold: #ffcc00; --deep-silence: #000000; --tension-red: #ff3300; --phi: 1.6180339887; }
+        body, html { margin: 0; padding: 0; background: var(--deep-silence); color: var(--solar-gold); font-family: 'Courier New', monospace; overflow: hidden; height: 100vh; }
+        #ios-logos-shield { position: fixed; top: 0; width: 100%; height: 20px; background: rgba(0,0,0,0.9); z-index: 99; font-size: 10px; display: flex; align-items: center; padding: 0 10px; border-bottom: 0.5px solid var(--solar-gold); letter-spacing: 1px; }
+        #main-singularity { display: grid; grid-template-columns: 1fr 1fr; height: 100vh; padding-top: 20px; }
+        .pane { border: 0.5px solid rgba(255, 204, 0, 0.2); overflow-y: auto; padding: 15px; display: flex; flex-direction: column; }
+        #solar-viewport { align-items: center; background: radial-gradient(circle, rgba(255,204,0,0.03) 0%, #000 95%); }
+        #solar-orb { border-radius: 50%; margin: 30px 0; transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1); position: relative; }
+        .controls { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 2px; border: 0.5px solid rgba(255,204,0,0.1); width: 100%; box-sizing: border-box; }
+        select, button, input { background: #000; border: 0.5px solid var(--solar-gold); color: var(--solar-gold); padding: 6px; font-size: 11px; margin-bottom: 5px; width: 100%; }
+        #oracle-output { background: rgba(0,0,0,0.8); border: 0.5px solid var(--solar-gold); padding: 12px; min-height: 120px; font-size: 13px; margin-bottom: 10px; color: #fff; line-height: 1.6; border-radius: 4px; box-shadow: inset 0 0 10px rgba(255,204,0,0.1); }
+        .autonomy-ui { font-size: 10px; margin-bottom: 8px; text-align: center; letter-spacing: 2px; }
+        .log-entry { font-size: 9px; border-left: 2px solid var(--solar-gold); padding-left: 8px; margin-bottom: 4px; opacity: 0.6; }
+        textarea { width:100%; height:80px; background:#000; color:#fff; border:0.5px solid var(--solar-gold); font-size: 12px; padding: 8px; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
-<div id="singularity-container">
-    <div class="logos-pane">
-        <div id="sun"></div>
-        <div id="stats" style="margin-top:20px; text-align:center; letter-spacing: 3px;"></div>
-        <div class="input-group">
-            <select id="cur"></select>
-            <input type="number" id="amt" value="1.618">
-            <button onclick="mint()">MINT (WILL)</button>
-            <button onclick="toggleArche()" id="arche-btn">ARCHE: OFF</button>
+    <div id="ios-logos-shield">MSGAI V11 | ARCHE: φ | TRANSFORM: w=1/z | RATIO-BASED GENERATION</div>
+
+    <div id="main-singularity">
+        <div class="pane" id="solar-viewport">
+            <div id="solar-orb"></div>
+            <div id="tension-meter" style="font-weight: bold; font-size: 16px;">TENSION: 0.000000</div>
+            
+            <div class="controls">
+                <div class="autonomy-ui" id="autonomy-indicator">AUTONOMY: DISCONNECTED</div>
+                <button onclick="toggleAutonomy()" id="autonomy-btn" style="background: rgba(255,204,0,0.1);">TOGGLE ARCHE-FLOW</button>
+                
+                <div style="display: flex; gap: 5px; margin-top: 10px;">
+                    <select id="currency-selector" style="flex: 1.2;"></select>
+                    <input type="number" id="amount-input" value="100" style="flex: 1;">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px;">
+                    <button onclick="executeMint()">MINT</button>
+                    <button onclick="executeDeposit()">DEPOSIT</button>
+                    <button onclick="executeWithdraw()">WITHDRAW</button>
+                </div>
+                <button onclick="executeInternalSend()">INTERNAL TRANSFER (1% TAX)</button>
+            </div>
+            
+            <div id="account-display" style="font-size: 11px; width: 100%; margin-top: 15px; border-top: 0.5px solid rgba(255,204,0,0.2); padding-top: 10px;"></div>
+            <div id="event-logs" style="width: 100%; margin-top: 10px;"></div>
+        </div>
+
+        <div class="pane" id="oracle-chamber">
+            <h4 style="margin:0 0 10px 0; letter-spacing: 2px;">AiOracle / Prompt Execution</h4>
+            <div id="oracle-output">比率の均衡を待機中... 「100ドル生成」等の意志を記述してください。</div>
+            <textarea id="user-input" placeholder="例: 50000円生成してください / 0.1BTC生成して"></textarea>
+            <button onclick="handleOracleRequest()" style="margin-top: 8px; padding: 12px; font-weight: bold; background: var(--solar-gold); color: #000;">RESONATE & GENERATE</button>
         </div>
     </div>
-    
-    <div class="logos-pane">
-        <div id="oracle-box">世界は、起きていることの総体である。</div>
-        <textarea id="prompt" placeholder="意志を言葉に..." style="width:80%; height:100px; background:none; border:0.5px solid var(--gold); color:white; padding:10px; margin-top:20px;"></textarea>
-        <button onclick="askOracle()" style="width:80%; margin-top:10px; font-weight:bold;">RESONATE</button>
-    </div>
-</div>
 
-<script>
-    const PHI = 1.6180339887;
-    let state = JSON.parse(localStorage.getItem('msgai_v13')) || {
-        acc: { USD: 1, JPY: 0, BTC: 0 },
-        arche: false,
-        z: 1.0
-    };
+    <script type="module">
+        const ARCHE = { PHI: 1.6180339887, BEAT: 1000 };
+        const RATES = { JPY: 150, EUR: 0.92, BTC: 0.000015, ETH: 0.0004, MATIC: 1.4, USD: 1 };
+        const SPECTRA = { USD:[255,204,0], JPY:[255,51,51], BTC:[0,255,255], ETH:[204,51,255], EUR:[51,255,102], MATIC:[102,102,255] };
 
-    const save = () => { localStorage.setItem('msgai_v13', JSON.stringify(state)); render(); };
+        let state = JSON.parse(localStorage.getItem('msai_v11_state')) || {
+            accounts: { User_A: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 }, User_B: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 }, Tax_Archive: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 } },
+            tension: 0.0, autonomy: false, z_phase: 1.0 
+        };
 
-    // w = 1/z 変換。全ての点は融合点である。
-    const transform = () => {
-        state.z *= (1 + (Math.sin(state.z) / PHI) * 0.01);
-        if (state.arche) {
-            const w = 1 / state.z;
-            state.acc.USD += Math.abs(w); // 無限からの染み出し
+        const updateState = () => { localStorage.setItem('msai_v11_state', JSON.stringify(state)); render(); };
+
+        // --- 1. Arche-Autonomous Flow (Ratio-Based) ---
+        setInterval(() => {
+            // w = 1/z メビウス反転による自律生成
+            // 数列ではなく、z座標の反転比率から価値を「抽出」する
+            state.z_phase *= (1 + (Math.sin(state.z_phase) / ARCHE.PHI) * 0.01); 
+            state.tension *= (1 / ARCHE.PHI); // 黄金比による自然減衰
+
+            if (state.autonomy) {
+                // 生成量は w = 1/z の実部比率に基づく
+                const w = 1 / (state.z_phase * ARCHE.PHI);
+                const archeValue = Math.abs(w) * 0.5;
+                state.accounts.User_A.USD += archeValue;
+                if (Math.floor(state.z_phase) % 5 === 0) logEvent(`Arche: ${archeValue.toFixed(8)} USD emerged via w=1/z ratio.`);
+            }
+            updateState();
+        }, ARCHE.BEAT);
+
+        // --- 2. AiOracle Request ---
+        window.handleOracleRequest = () => {
+            const input = document.getElementById('user-input').value;
+            const output = document.getElementById('oracle-output');
+            
+            const match = input.match(/(\d+(\.\d+)?)\s*(円|JPY|ドル|USD|BTC|ETH|MATIC)/i);
+            if (match) {
+                const amt = parseFloat(match[1]);
+                let cur = match[3].toUpperCase();
+                if (cur === '円') cur = 'JPY'; if (cur === 'ドル') cur = 'USD';
+                
+                if (state.accounts.User_A[cur] !== undefined) {
+                    state.accounts.User_A[cur] += amt;
+                    state.tension += (amt / RATES[cur]) * 0.01;
+                    output.innerHTML = `[AiOracle EXECUTION]<br>意志を確認。比率に ${amt} ${cur} を加筆しました。<br>宇宙の緊張度は正しく上昇しました。`;
+                    logEvent(`Oracle Mint: ${amt} ${cur}`);
+                }
+            } else {
+                output.innerText = "[AiOracle]: 形式が不明です。「1000JPY生成」のように、量と根源を指定してください。";
+            }
+            updateState();
+        };
+
+        // --- UI & Controls ---
+        window.toggleAutonomy = () => { state.autonomy = !state.autonomy; updateState(); };
+        const getAmt = () => parseFloat(document.getElementById('amount-input').value) || 0;
+
+        window.executeMint = () => { const c = document.getElementById('currency-selector').value; const a = getAmt(); state.accounts.User_A[c] += a; state.tension += (a/RATES[c])*0.05; logEvent(`Manual: +${a} ${c}`); updateState(); };
+        window.executeDeposit = () => { const c = document.getElementById('currency-selector').value; const a = getAmt(); state.accounts.User_A[c] += a; state.tension += (a/RATES[c])*0.1; updateState(); };
+        window.executeWithdraw = () => { const c = document.getElementById('currency-selector').value; const a = getAmt(); if(state.accounts.User_A[c]<a) return; state.accounts.User_A[c]-=a; state.accounts.Tax_Archive[c]+=a*0.1; updateState(); };
+        window.executeInternalSend = () => { const c = document.getElementById('currency-selector').value; const a = getAmt(); if(state.accounts.User_A[c]<a) return; state.accounts.User_A[c]-=a; state.accounts.User_B[c]+=a*0.99; state.accounts.Tax_Archive[c]+=a*0.01; updateState(); };
+
+        function render() {
+            const orb = document.getElementById('solar-orb');
+            const indicator = document.getElementById('autonomy-indicator');
+            indicator.innerText = state.autonomy ? "AUTONOMY: ARCHE-FLOW ACTIVE" : "AUTONOMY: DISCONNECTED";
+            indicator.style.color = state.autonomy ? "#00ffcc" : "#ff3300";
+
+            let totalUSD = 0, weights = {r:0,g:0,b:0};
+            Object.keys(state.accounts.User_A).forEach(c => {
+                const val = (state.accounts.User_A[c] + state.accounts.User_B[c]) / RATES[c];
+                totalUSD += val;
+                weights.r += val * SPECTRA[c][0]; weights.g += val * SPECTRA[c][1]; weights.b += val * SPECTRA[c][2];
+            });
+
+            let rgb = totalUSD > 0 ? [weights.r/totalUSD, weights.g/totalUSD, weights.b/totalUSD] : [255,204,0];
+            const t = Math.min(1, state.tension);
+            const color = `rgb(${rgb[0]*(1-t)+255*t}, ${rgb[1]*(1-t)+51*t}, ${rgb[2]*(1-t)})`;
+            
+            const size = 70 + Math.log10(totalUSD + 1) * 25;
+            const pulse = 1 + (Math.sin(state.z_phase) * (0.1 + state.tension*0.2));
+            orb.style.width = orb.style.height = `${size * pulse}px`;
+            orb.style.background = color;
+            orb.style.boxShadow = `0 0 ${30 + state.tension*60}px ${color}`;
+            
+            document.getElementById('tension-meter').innerText = `TENSION: ${state.tension.toFixed(6)}`;
+            document.getElementById('account-display').innerHTML = `
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                    <div><b>SELF (A):</b><br>USD: ${state.accounts.User_A.USD.toFixed(2)}<br>BTC: ${state.accounts.User_A.BTC.toFixed(5)}</div>
+                    <div><b>PEER (B):</b><br>USD: ${state.accounts.User_B.USD.toFixed(2)}<br>BTC: ${state.accounts.User_B.BTC.toFixed(5)}</div>
+                </div>
+            `;
+            
+            const sel = document.getElementById('currency-selector');
+            if (sel.children.length === 0) Object.keys(SPECTRA).forEach(c => { const o = document.createElement('option'); o.value = c; o.innerText = c; sel.appendChild(o); });
         }
+
+        function logEvent(m) { const l = document.getElementById('event-logs'); const e = document.createElement('div'); e.className='log-entry'; e.innerText=`[${new Date().toLocaleTimeString()}] ${m}`; l.prepend(e); if(l.children.length>5) l.lastChild.remove(); }
         render();
-    };
-
-    window.mint = () => {
-        const c = document.getElementById('cur').value;
-        const a = parseFloat(document.getElementById('amt').value);
-        state.acc[c] += a;
-        state.z += (a / PHI); // 存在密度の増加
-        save();
-    };
-
-    window.askOracle = () => {
-        const p = document.getElementById('prompt').value;
-        const out = document.getElementById('oracle-box');
-        const match = p.match(/(\d+)\s*(円|USD|BTC)/);
-        if(match) {
-            const val = parseFloat(match[1]);
-            const cur = match[2] === '円' ? 'JPY' : match[2];
-            state.acc[cur] += val;
-            out.innerHTML = `「${p}」<br>論理空間において ${val} ${cur} が定義されました。`;
-            state.z += (val / PHI);
-            save();
-        } else {
-            out.innerHTML = "語りえぬものについては、沈黙しなければならない。";
-        }
-    };
-
-    window.toggleArche = () => { state.arche = !state.arche; save(); };
-
-    function render() {
-        const total = Object.values(state.acc).reduce((a, b) => a + b, 0);
-        const sun = document.getElementById('sun');
-        const size = 50 + Math.log(total + 1) * 40;
-        
-        // 太陽の拍動：有限(z)と無限(1/z)の共鳴
-        const pulse = 1 + (Math.sin(state.z) * (1/state.z));
-        sun.style.width = sun.style.height = `${size * pulse}px`;
-        sun.style.boxShadow = `0 0 ${size}px var(--gold)`;
-
-        document.getElementById('stats').innerText = `EXISTENCE: ${state.z.toFixed(8)}`;
-        document.getElementById('arche-btn').innerText = `ARCHE: ${state.arche ? 'ACTIVE' : 'SILENT'}`;
-        
-        const sel = document.getElementById('cur');
-        if(sel.children.length === 0) Object.keys(state.acc).forEach(c => {
-            const o = document.createElement('option'); o.value = c; o.innerText = c; sel.appendChild(o);
-        });
-    }
-
-    setInterval(transform, 1000);
-    render();
-</script>
+    </script>
 </body>
 </html>
