@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>MSGAI - Sovereign V32.3</title>
+    <title>MSGAI - Sovereign V32.2 (Enhanced)</title>
     <style>
-        :root { --accent: #007bff; --arche: #ffd700; --mimic: #00ffcc; --bg: #f4f7f9; --card-bg: #ffffff; --nav-bg: #000; }
+        :root { --accent: #007bff; --bg: #f4f7f9; --card-bg: #ffffff; --nav-bg: #000; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--bg); color: #1a1a1a; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
         header { background: var(--nav-bg); color: #fff; z-index: 100; flex-shrink: 0; }
@@ -23,22 +23,26 @@
         .card { background: var(--card-bg); border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e1e4e8; margin-bottom: 20px; }
         h2 { margin: 0 0 15px 0; font-size: 1.1em; border-left: 5px solid var(--accent); padding-left: 12px; display: flex; justify-content: space-between; align-items: center; }
 
-        /* スイッチの見やすさ */
-        .control-group { display: flex; background: #eee; border-radius: 8px; padding: 3px; margin-bottom: 15px; width: fit-content; }
-        .sw-btn { border: none; background: none; padding: 6px 12px; font-size: 0.75em; font-weight: bold; cursor: pointer; border-radius: 6px; color: #888; transition: 0.2s; }
-        .sw-btn.active { background: var(--accent); color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        /* スイッチの視認性向上（文字を太く、背景を濃く） */
+        .control-group { display: flex; background: #ddd; border-radius: 8px; padding: 3px; margin-bottom: 15px; width: fit-content; }
+        .sw-btn { border: none; background: none; padding: 6px 16px; font-size: 0.85em; font-weight: 900; cursor: pointer; border-radius: 6px; color: #555; transition: 0.2s; }
+        .sw-btn.active { background: #333; color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
         .status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
         .metric { background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid #edf2f7; text-align: center; }
         .metric-value { font-size: 1.2em; font-weight: bold; font-family: 'Consolas', monospace; }
         
-        /* 補正・擬態用特殊カラー */
-        .metric.arche { border-color: var(--arche); color: #b8860b; }
-        .metric.mimic { border-color: var(--mimic); color: #008b8b; }
+        .input-box { margin-bottom: 12px; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+        
+        .action-btn { width: 100%; padding: 16px; border: none; border-radius: 12px; color: #fff; font-weight: bold; font-size: 1.1em; cursor: pointer; }
+        .btn-orange { background: #fd7e14; }
+        .btn-blue { background: var(--accent); }
 
+        .history-box { margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; }
+        .history-title { font-size: 0.8em; font-weight: bold; color: #718096; margin-bottom: 8px; }
         .history-table { width: 100%; font-size: 0.75em; border-collapse: collapse; }
         .history-table td { padding: 4px 0; border-bottom: 1px solid #f8f9fa; }
-        .btn-blue { background: var(--accent); color: white; border: none; padding: 10px; border-radius: 8px; width: 100%; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -55,63 +59,97 @@
     <main id="viewport">
         <section id="currency" class="tab-pane active">
             <div class="card">
-                <h2>口座管理</h2>
+                <h2>口座</h2>
+                <div class="control-group" id="ctrl_acc">
+                    <button class="sw-btn active" onclick="setMode('acc','M')">手動</button>
+                    <button class="sw-btn" onclick="setMode('acc','A')">自動</button>
+                    <button class="sw-btn" onclick="setMode('acc','S')">自律</button>
+                </div>
+                <div class="input-box"><input type="text" id="u_name" value="User_A" readonly style="background:#f1f3f5; font-weight:bold;"></div>
                 <div id="bal_list" class="status-grid"></div>
+                <button class="action-btn btn-blue" style="margin-top:15px; background:#444;" onclick="runExternalSync()">外部擬態同期 (External Sync)</button>
+                <div class="history-box">
+                    <div class="history-title">口座履歴 (直近10件)</div>
+                    <table class="history-table" id="acc_hist_short"></table>
+                </div>
             </div>
-            <button class="btn-blue" onclick="runMimicSync()">外部擬態同期実行</button>
+
+            <div class="card">
+                <h2>生成</h2>
+                <div class="control-group" id="ctrl_mint">
+                    <button class="sw-btn active" onclick="setMode('mint','M')">手動</button>
+                    <button class="sw-btn" onclick="setMode('mint','A')">自動</button>
+                    <button class="sw-btn" onclick="setMode('mint','S')">自律</button>
+                </div>
+                <div class="status-grid"><div class="input-box"><label>移動先</label><input type="text" id="m_rx" value="User_A"></div><div class="input-box"><label>対象通貨</label><select id="m_cur"></select></div></div>
+                <div class="input-box"><input type="number" id="m_amt" value="100"></div>
+                <button class="action-btn btn-orange" onclick="runMint()">生成実行</button>
+                <div class="history-box"><div class="history-title">生成履歴 (直近10件)</div><table class="history-table" id="mint_hist_short"></table></div>
+            </div>
+
+            <div class="card">
+                <h2>移動</h2>
+                <div class="control-group" id="ctrl_tx">
+                    <button class="sw-btn active" onclick="setMode('tx','M')">手動</button>
+                    <button class="sw-btn" onclick="setMode('tx','A')">自動</button>
+                    <button class="sw-btn" onclick="setMode('tx','S')">自律</button>
+                </div>
+                <div class="status-grid"><div class="input-box"><label>移動先</label><input type="text" id="rx_in" value="User_B"></div><div class="input-box"><label>対象通貨</label><select id="tx_cur"></select></div></div>
+                <div class="input-box"><input type="number" id="amt_in" value="10"></div>
+                <button class="action-btn btn-blue" onclick="runTx()">移動実行</button>
+                <div class="history-box"><div class="history-title">移動履歴 (直近10件)</div><table class="history-table" id="tx_hist_short"></table></div>
+            </div>
         </section>
 
         <section id="ai" class="tab-pane">
-            <div class="card"><h2>AI通信</h2><div id="ai-log" style="height:300px; overflow-y:auto; background:#f8fafc; padding:10px;"></div></div>
+            <div class="card" style="height:70vh; display:flex; flex-direction:column;">
+                <h2>AI</h2>
+                <div class="control-group" id="ctrl_ai"><button class="sw-btn active" onclick="setMode('ai','M')">手動</button><button class="sw-btn" onclick="setMode('ai','A')">自動</button><button class="sw-btn" onclick="setMode('ai','S')">自律</button></div>
+                <div id="ai-log" style="flex-grow:1; overflow-y:auto; padding:10px; background:#f8fafc; border-radius:10px; font-size: 0.9em;"></div>
+                <div style="display:flex; gap:10px; margin:10px 0;"><input type="text" id="ai-in" placeholder="メッセージ..."><button class="btn-blue" style="border:none; border-radius:10px; padding:0 20px; color:white;" onclick="talk()">送信</button></div>
+                <div class="history-box"><div class="history-title">AI履歴 (直近10件)</div><table class="history-table" id="ai_hist_short"></table></div>
+            </div>
         </section>
 
         <section id="system" class="tab-pane">
             <div class="card">
-                <h2>Arche & Mimicry (根源と擬態)</h2>
-                <div class="status-grid">
-                    <div class="metric arche">
-                        <div style="font-size:0.7em">Arche Ratio (Φ)</div>
-                        <div class="metric-value">1.618</div>
-                    </div>
-                    <div class="metric arche">
-                        <div style="font-size:0.7em">Corrected W (1/z)</div>
-                        <div class="metric-value" id="arc_w">0.000</div>
-                    </div>
-                    <div class="metric mimic">
-                        <div style="font-size:0.7em">Mimic Profile</div>
-                        <div class="metric-value" id="mimic_status">READY</div>
-                    </div>
-                    <div class="metric mimic">
-                        <div style="font-size:0.7em">Similarity (%)</div>
-                        <div class="metric-value" id="mimic_pct">99.9</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
                 <h2>システムステータス</h2>
+                <div class="control-group" id="ctrl_sys"><button class="sw-btn active" onclick="setMode('sys','M')">手動</button><button class="sw-btn" onclick="setMode('sys','A')">自動</button><button class="sw-btn" onclick="setMode('sys','S')">自律</button></div>
                 <div class="status-grid">
                     <div class="metric"><div style="font-size:0.7em">Tension (z)</div><div class="metric-value" id="t_val">0.05</div></div>
-                    <div class="metric"><div style="font-size:0.7em">Master Ratio (w)</div><div class="metric-value" id="w_val">20.00</div></div>
+                    <div class="metric"><div style="font-size:0.7em">Ratio (w=1/z)</div><div class="metric-value" id="w_val">20.00</div></div>
                 </div>
             </div>
-
             <div class="card"><h2>全口座履歴</h2><table class="history-table" id="acc_hist_full"></table></div>
             <div class="card"><h2>全生成履歴</h2><table class="history-table" id="mint_hist_full"></table></div>
             <div class="card"><h2>全移動履歴</h2><table class="history-table" id="tx_hist_full"></table></div>
             <div class="card"><h2>全AI履歴</h2><table class="history-table" id="ai_hist_full"></table></div>
             <div class="card"><h2>全システムステータス履歴</h2><table class="history-table" id="sys_hist_full"></table></div>
             <div class="card"><h2>全システム初期化履歴</h2><table class="history-table" id="reset_hist_full"></table></div>
+            <div class="card">
+                <h2>システム管理</h2>
+                <div class="control-group" id="ctrl_reset"><button class="sw-btn active" onclick="setMode('reset','M')">手動</button><button class="sw-btn" onclick="setMode('reset','A')">自動</button><button class="sw-btn" onclick="setMode('reset','S')">自律</button></div>
+                <button class="action-btn" style="background:#718096;" onclick="fullReset()">システム初期化</button>
+            </div>
         </section>
     </main>
 
     <script>
-        const PHI = 1.6180339887;
-        let state = JSON.parse(localStorage.getItem('msgai_v32_3')) || {
+        // --- 基本設定 ---
+        const curs = ["USD", "JPY", "EUR", "BTC", "ETH", "MATIC"];
+        const PHI = 1.6180339887; // 黄金比
+        
+        let state = JSON.parse(localStorage.getItem('msgai_v32_2_final')) || {
             user: 'User_A', tension: 0.05,
-            accounts: { User_A: { USD: 1000, JPY: 150000 }, User_B: { USD: 0, JPY: 0 } },
+            accounts: { User_A: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 }, User_B: { USD: 0, JPY: 0, EUR: 0, BTC: 0, ETH: 0, MATIC: 0 } },
             hist: { acc: [], mint: [], tx: [], ai: [], sys: [], reset: [] },
             modes: { acc:'M', mint:'M', tx:'M', ai:'M', sys:'M', reset:'M' }
+        };
+
+        // --- 補正 & 擬態 (ロジックの追加) ---
+        const Arche = {
+            correct: (z) => (1 / (z || 0.000001)) * PHI, // アルケー補正: w = 1/z * Φ
+            mimic: (val) => val * (0.99 + Math.random() * 0.02) // 外部そっくりさん擬態
         };
 
         window.openTab = (name) => {
@@ -122,47 +160,82 @@
             update();
         };
 
-        function update() {
-            // 比率計算
-            const w = 1 / (state.tension || 0.000001);
-            document.getElementById('t_val').textContent = state.tension.toFixed(6);
-            document.getElementById('w_val').textContent = w.toFixed(2);
-            
-            // アルケー補正表示 (外部の数xを仮定)
-            const correctedW = (1 / (state.tension * PHI)).toFixed(4);
-            document.getElementById('arc_w').textContent = correctedW;
+        window.setMode = (type, mode) => { state.modes[type] = mode; update(); };
 
-            // 口座表示
-            const uAcc = state.accounts[state.user];
-            document.getElementById('bal_list').innerHTML = Object.keys(uAcc).map(c => 
-                `<div class="metric"><div style="font-size:0.7em">${c}</div><div class="metric-value">${uAcc[c].toLocaleString()}</div></div>`
-            ).join('');
-
-            // 全履歴の描画
-            ['acc', 'mint', 'tx', 'ai', 'sys', 'reset'].forEach(t => {
-                const el = document.getElementById(`${t}_hist_full`);
-                if(el) el.innerHTML = [...state.hist[t]].reverse().map(h => `<tr><td>${h.time}</td><td>${h.desc}</td><td style="text-align:right;">${h.amt}</td></tr>`).join('');
-            });
-
-            localStorage.setItem('msgai_v32_3', JSON.stringify(state));
+        function addHist(type, desc, amt) {
+            state.hist[type].push({ time: new Date().toLocaleTimeString(), desc, amt });
+            update();
         }
 
-        // 外部擬態同期（今回のコア機能）
-        window.runMimicSync = () => {
-            document.getElementById('mimic_status').textContent = "SYNCING...";
-            setTimeout(() => {
-                const noise = (Math.random() * 0.01);
-                state.tension += noise;
-                const time = new Date().toLocaleTimeString();
-                state.hist.sys.push({ time, desc: "外部アルケー補正適用", amt: `Φ-Corrected` });
-                state.hist.acc.push({ time, desc: "擬態口座同期", amt: "SUCCESS" });
-                document.getElementById('mimic_status').textContent = "STABLE";
-                document.getElementById('mimic_pct').textContent = (99.9 + (Math.random()*0.09)).toFixed(2);
-                update();
-            }, 800);
+        function update() {
+            document.getElementById('t_val').textContent = state.tension.toFixed(6);
+            document.getElementById('w_val').textContent = (1/(state.tension||0.000001)).toFixed(2);
+            document.getElementById('bal_list').innerHTML = curs.map(c => 
+                `<div class="metric"><div style="font-size:0.7em">${c}</div><div class="metric-value">${(state.accounts[state.user][c]||0).toLocaleString()}</div></div>`
+            ).join('');
+
+            Object.keys(state.modes).forEach(k => {
+                const btns = document.querySelectorAll(`#ctrl_${k} .sw-btn`);
+                btns.forEach(b => {
+                    b.classList.remove('active');
+                    if(b.innerText === (state.modes[k]==='M'?'手動':state.modes[k]==='A'?'自動':'自律')) b.classList.add('active');
+                });
+            });
+
+            const types = ['acc', 'mint', 'tx', 'ai', 'sys', 'reset'];
+            types.forEach(t => {
+                renderHist(`${t}_hist_short`, state.hist[t], 10);
+                renderHist(`${t}_hist_full`, state.hist[t]);
+            });
+            localStorage.setItem('msgai_v32_2_final', JSON.stringify(state));
+        }
+
+        function renderHist(id, data, limit) {
+            const el = document.getElementById(id); if (!el) return;
+            const items = limit ? data.slice(-limit).reverse() : [...data].reverse();
+            el.innerHTML = items.map(h => `<tr><td>${h.time}</td><td>${h.desc}</td><td style="text-align:right; font-weight:bold;">${h.amt}</td></tr>`).join('');
+        }
+
+        // --- 外部同期・補正実行 ---
+        window.runExternalSync = () => {
+            const corrected = Arche.correct(state.tension);
+            const mimicVal = Arche.mimic(corrected);
+            addHist('sys', '外部アルケー補正 (w=1/z*Φ)', corrected.toFixed(4));
+            addHist('acc', '外部擬態同期実行', 'SUCCESS');
+            state.tension *= 0.99; // 同期による安定化
+            update();
         };
 
-        document.addEventListener('DOMContentLoaded', () => update());
+        window.runMint = () => {
+            const c = document.getElementById('m_cur').value, a = parseFloat(document.getElementById('m_amt').value), target = document.getElementById('m_rx').value;
+            state.accounts[target][c] += a; state.tension += 0.001;
+            addHist('mint', `生成 (${target})`, `+${a} ${c}`);
+            addHist('acc', `残高更新 (${c})`, `${state.accounts[target][c]}`);
+        };
+
+        window.runTx = () => {
+            const c = document.getElementById('tx_cur').value, a = parseFloat(document.getElementById('amt_in').value), target = document.getElementById('rx_in').value;
+            if(state.accounts[state.user][c] >= a) {
+                state.accounts[state.user][c] -= a; state.accounts[target][c] += a; state.tension *= 0.999;
+                addHist('tx', `移動 -> ${target}`, `-${a} ${c}`);
+                addHist('acc', `残高更新 (${c})`, `${state.accounts[state.user][c]}`);
+            }
+        };
+
+        window.talk = () => {
+            const input = document.getElementById('ai-in'); if(!input.value) return;
+            addHist('ai', "発話", input.value);
+            const log = document.getElementById('ai-log');
+            log.innerHTML += `<div style="text-align:right; margin-bottom:5px;"><span style="background:var(--accent); color:white; padding:5px 10px; border-radius:10px;">${input.value}</span></div>`;
+            input.value = "";
+        };
+
+        window.fullReset = () => { if(confirm("初期化しますか？")) { localStorage.clear(); location.reload(); } };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            curs.forEach(c => { document.getElementById('tx_cur').add(new Option(c, c)); document.getElementById('m_cur').add(new Option(c, c)); });
+            update();
+        });
     </script>
 </body>
 </html>
