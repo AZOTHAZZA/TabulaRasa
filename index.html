@@ -85,10 +85,19 @@
                 <div class="ext-config">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                         <span style="font-size:0.8em; font-weight:bold;">外部接続 [ON/OFF]</span>
-                        <div class="control-group" style="margin:0; scale:0.8;"><button id="ext_off" class="sw-btn active" onclick="setExtMode(false)">OFF</button><button id="ext_on" class="sw-btn" onclick="setExtMode(true)">ON</button></div>
+                        <div class="control-group" style="margin:0; scale:0.8;"><button id="ext_tx_off" class="sw-btn active" onclick="toggleExt('tx', false)">OFF</button><button id="ext_tx_on" class="sw-btn" onclick="toggleExt('tx', true)">ON</button></div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <span style="font-size:0.8em; font-weight:bold;">自律検索 [S-Search]</span>
+                        <button class="sw-btn" style="scale:0.8;" onclick="runAdvancedSearch('tx')">特定開始</button>
                     </div>
                     <div class="input-box"><label>外部接続先URL</label><input type="text" id="tx_ext_url"></div>
                     <div class="input-box"><label>外部認証キー</label><input type="password" id="tx_ext_key"></div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                        <div class="input-box"><label>外部プロトコル</label><input type="text" id="tx_proto"></div>
+                        <div class="input-box"><label>外部ヘッダー構造</label><input type="text" id="tx_head"></div>
+                    </div>
+                    <div class="input-box"><label>外部データ形式</label><input type="text" id="tx_schema"></div>
                 </div>
                 <button class="action-btn btn-blue" style="margin-top:10px" onclick="runTx()">移動実行</button>
                 <div class="history-box">
@@ -110,8 +119,18 @@
             <div class="card">
                 <h2>AI外部接続設定</h2>
                 <div class="ext-config">
+                    <div class="input-box"><label>生成AI名 (名称入力で自律特定)</label><input type="text" id="ai_name_input" placeholder="GPT-4"></div>
                     <div class="input-box"><label>外部接続先URL</label><input type="text" id="ai_ext_url"></div>
                     <div class="input-box"><label>外部認証キー</label><input type="password" id="ai_ext_key"></div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                        <div class="input-box"><label>外部プロトコル</label><input type="text" id="ai_proto"></div>
+                        <div class="input-box"><label>外部ヘッダー構造</label><input type="text" id="ai_head"></div>
+                    </div>
+                    <div class="input-box"><label>外部データ形式</label><input type="text" id="ai_schema"></div>
+                </div>
+                <div class="history-box">
+                    <div class="history-header"><span class="history-title">AI履歴 (直近10件)</span><a class="view-all-link" onclick="scrollToHistory('ai')">全件表示</a></div>
+                    <table class="history-table" id="ai_hist_short"></table>
                 </div>
             </div>
         </section>
@@ -144,18 +163,18 @@
 
     <script>
         const curs = ["USD", "JPY", "EUR", "BTC", "ETH", "MATIC"];
-        let state = JSON.parse(localStorage.getItem('msgai_v36_1_final')) || {
-            user: 'User_A', tension: 0.05, isExt: false,
-            // 初期値は全て平等に0
+        const phi = 1.6180339887;
+        let state = JSON.parse(localStorage.getItem('msgai_v36_1_complete')) || {
+            user: 'User_A', tension: 0.05, isExt_tx: false,
+            // 初期値は全て0に修正
             accounts: { User_A: {USD:0, JPY:0, EUR:0, BTC:0, ETH:0, MATIC:0}, User_B: {USD:0, JPY:0, EUR:0, BTC:0, ETH:0, MATIC:0} },
             hist: { acc: [], mint: [], tx: [], ai: [], sys: [] }
         };
 
         const msgai = {
-            phi: 1.6180339887,
             z: (t) => (t.length / 50) + (new Set(t).size / 20),
             w: (z, raw) => {
-                const step = Math.max(1, Math.round(msgai.phi * (1/z) * 0.1));
+                const step = Math.max(1, Math.round(phi * (1/z) * 0.1));
                 return raw.split('').filter((_, i) => i % step === 0).join('');
             }
         };
@@ -167,14 +186,23 @@
             update();
         };
 
-        window.setExtMode = (v) => {
-            state.isExt = v;
-            document.getElementById('ext_on').classList.toggle('active', v);
-            document.getElementById('ext_off').classList.toggle('active', !v);
-            addHist('sys', `外部接続: ${v?'ON':'OFF'}`, v?'CAUTION':'STABLE');
+        window.toggleExt = (type, val) => {
+            state[`isExt_${type}`] = val;
+            document.getElementById(`ext_${type}_on`).classList.toggle('active', val);
+            document.getElementById(`ext_${type}_off`).classList.toggle('active', !val);
+            addHist('sys', `${type.toUpperCase()} 外部接続: ${val?'ON':'OFF'}`, val?'CAUTION':'STABLE');
         };
 
         window.scrollToHistory = (t) => { openTab('system'); setTimeout(() => { document.getElementById(`hist_${t}_target`).scrollIntoView({ behavior: 'smooth' }); }, 100); };
+
+        async function runAdvancedSearch(type) {
+            const name = type === 'tx' ? document.getElementById('rx_in').value : document.getElementById('ai_name_input').value;
+            document.getElementById(`${type}_ext_url`).value = `https://api.gateway.ai/v1/${name}`;
+            document.getElementById(`${type}_proto`).value = "REST/JSON";
+            document.getElementById(`${type}_head`).value = "Bearer";
+            document.getElementById(`${type}_schema`).value = "v3-Default";
+            addHist('sys', `${name} の接続情報を自律特定`, "SUCCESS");
+        }
 
         function addHist(type, desc, amt) {
             state.hist[type].push({ time: new Date().toLocaleTimeString(), desc, amt });
@@ -193,7 +221,7 @@
                 if(s) s.innerHTML = items.slice(0, 10).map(h => `<tr><td>${h.time}</td><td>${h.desc}</td><td>${h.amt}</td></tr>`).join('');
                 if(f) f.innerHTML = items.map(h => `<tr><td>${h.time}</td><td>${h.desc}</td><td>${h.amt}</td></tr>`).join('');
             });
-            localStorage.setItem('msgai_v36_1_final', JSON.stringify(state));
+            localStorage.setItem('msgai_v36_1_complete', JSON.stringify(state));
         }
 
         window.runMint = () => {
@@ -205,7 +233,7 @@
 
         window.runTx = () => {
             const c = document.getElementById('tx_cur').value, a = parseFloat(document.getElementById('amt_in').value), t = document.getElementById('rx_in').value;
-            if(state.isExt) state.tension += 0.05;
+            if(state.isExt_tx) state.tension += 0.05;
             if((state.accounts[state.user][c]||0) >= a) {
                 state.accounts[state.user][c] -= a;
                 if(!state.accounts[t]) state.accounts[t] = {USD:0, JPY:0, EUR:0, BTC:0, ETH:0, MATIC:0};
@@ -227,18 +255,19 @@
                 try {
                     const res = await fetch(document.getElementById('ai_ext_url').value || "https://api.openai.com/v1/chat/completions", {
                         method: "POST", headers: {"Content-Type":"application/json", "Authorization":`Bearer ${key}`},
-                        body: JSON.stringify({model:"gpt-3.5-turbo", messages:[{role:"system", content:"MSGAI mode."},{role:"user", content:userTxt}]})
+                        body: JSON.stringify({model:"gpt-3.5-turbo", messages:[{role:"system", content:"MSGAI Logic Engine."},{role:"user", content:userTxt}]})
                     });
                     const d = await res.json(); aiRaw = d.choices[0].message.content;
-                } catch(e) { aiRaw = "Connection Error."; }
+                } catch(e) { aiRaw = "Connection Failure."; }
             }
             const out = msgai.w(state.tension, aiRaw);
             log.innerHTML += `<div style="margin-bottom:10px;"><span style="background:#eee; padding:8px 12px; border-radius:12px; display:inline-block; border-left:4px solid var(--accent);">${out}</span></div>`;
-            addHist('ai', "発話", out);
+            // AI履歴に正しく記録
+            addHist('ai', userTxt, out);
             input.value = ""; update(); log.scrollTop = log.scrollHeight;
         };
 
-        window.fullReset = () => { if(confirm("初期化？")) { localStorage.clear(); location.reload(); } };
+        window.fullReset = () => { if(confirm("初期化しますか？")) { localStorage.clear(); location.reload(); } };
 
         document.addEventListener('DOMContentLoaded', () => {
             curs.forEach(c => { document.getElementById('tx_cur').add(new Option(c, c)); document.getElementById('m_cur').add(new Option(c, c)); });
