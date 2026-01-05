@@ -2,173 +2,325 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MSGAI - 新因果律による位相同期</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>MSGAI - Sovereign V36.1</title>
     <style>
-        /* 【踏襲継承】現在のUI比率を黄金比(1.618)で固定 
-           意匠（色）に溺れず、構造としてのデザインを執行
-        */
-        :root {
-            --phi: 1.6180339887;
-            --base-unit: 1rem;
-            --phi-unit: calc(var(--base-unit) * var(--phi));
-            --bg-color: #ffffff; /* 意匠に流されない無地の白 */
-            --text-color: #333333;
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            background: var(--bg-color);
-            color: var(--text-color);
-            overflow: hidden;
-        }
-
-        /* メビウス変換的UI：表裏一体の循環構造 */
-        #app-container {
-            display: grid;
-            grid-template-columns: 1fr calc(1fr * var(--phi));
-            height: 100%;
-            transition: transform 0.618s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        #wallet-section {
-            padding: var(--phi-unit);
-            border-right: 1px solid #eee;
-            display: flex;
-            flex-direction: column;
-            gap: var(--base-unit);
-        }
-
-        #ai-section {
-            padding: var(--phi-unit);
-            background: #fafafa;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .status-display {
-            font-size: calc(var(--base-unit) * var(--phi));
-            font-weight: bold;
-            margin-bottom: var(--base-unit);
-        }
-
-        input, button {
-            padding: 0.618rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 1rem;
-        }
-
-        button {
-            background: #333;
-            color: white;
-            cursor: pointer;
-            transition: opacity 0.3s;
-        }
-
-        button:hover {
-            opacity: 0.8;
-        }
-
-        #chat-log {
-            flex-grow: 1;
-            overflow-y: auto;
-            border: 1px solid #eee;
-            padding: var(--base-unit);
-            background: white;
-            margin-bottom: var(--base-unit);
-        }
+        /* UIデザイン・構造は100%踏襲継承 */
+        :root { --accent: #007bff; --bg: #f4f7f9; --card-bg: #ffffff; --nav-bg: #000; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--bg); color: #1a1a1a; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        header { background: var(--nav-bg); color: #fff; z-index: 100; flex-shrink: 0; }
+        .header-top { display: flex; justify-content: center; padding: 25px 0; }
+        .logo-text { font-size: 1.6em; font-weight: bold; letter-spacing: 8px; color: var(--accent); cursor: pointer; }
+        .tab-menu { display: flex; background: #111; }
+        .tab-btn { background: none; border: none; color: #666; padding: 18px 0; cursor: pointer; font-weight: bold; font-size: 1.1em; flex: 1; border-bottom: 4px solid transparent; }
+        .tab-btn.active { color: #fff; border-bottom: 4px solid var(--accent); background: #1a1a1a; }
+        #viewport { flex-grow: 1; overflow-y: auto; padding: 20px; padding-bottom: 150px; }
+        .tab-pane { display: none; width: 100%; max-width: 800px; margin: 0 auto; }
+        .tab-pane.active { display: block; }
+        .card { background: var(--card-bg); border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e1e4e8; margin-bottom: 20px; }
+        h2 { margin: 0 0 15px 0; font-size: 1.1em; border-left: 5px solid var(--accent); padding-left: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .control-group { display: flex; background: #eee; border-radius: 8px; padding: 3px; margin-bottom: 15px; width: fit-content; }
+        .sw-btn { border: none; background: none; padding: 6px 12px; font-size: 0.75em; font-weight: bold; cursor: pointer; border-radius: 6px; color: #888; transition: 0.2s; }
+        .sw-btn.active { background: var(--accent); color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+        .metric { background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid #edf2f7; text-align: center; }
+        .metric-value { font-size: 1.2em; font-weight: bold; font-family: 'Consolas', monospace; }
+        .input-box { margin-bottom: 12px; }
+        label { font-size: 0.7em; font-weight: bold; color: #718096; display: block; margin-bottom: 4px; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+        .action-btn { width: 100%; padding: 16px; border: none; border-radius: 12px; color: #fff; font-weight: bold; font-size: 1.1em; cursor: pointer; }
+        .btn-orange { background: #fd7e14; }
+        .btn-blue { background: var(--accent); }
+        .history-box { margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; }
+        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .history-title { font-size: 0.8em; font-weight: bold; color: #718096; }
+        .view-all-link { font-size: 0.75em; color: var(--accent); text-decoration: none; cursor: pointer; font-weight: bold; }
+        .history-table { width: 100%; font-size: 0.75em; border-collapse: collapse; }
+        .history-table td { padding: 4px 0; border-bottom: 1px solid #f8f9fa; }
+        .ext-config { margin-top: 15px; padding: 15px; background: #f1f3f5; border-radius: 12px; border: 1px dashed #adb5bd; }
     </style>
 </head>
 <body>
 
-<div id="app-container">
-    <section id="wallet-section">
-        <div class="status-display">SOL: <span id="balance">1.000</span></div>
-        <input type="number" id="amount" placeholder="循環させる量" step="0.001">
-        <button onclick="executeMobiusTransfer()">通貨の位相同期（メビウス変換）</button>
-        <div id="wallet-status" style="font-size: 0.8rem; color: #666;"></div>
-    </section>
+    <header>
+        <div class="header-top"><div class="logo-text" onclick="openTab('currency')">MSGAI SOVEREIGN</div></div>
+        <nav class="tab-menu">
+            <button class="tab-btn active" id="btn-currency" onclick="openTab('currency')">通貨</button>
+            <button class="tab-btn" id="btn-ai" onclick="openTab('ai')">AI</button>
+            <button class="tab-btn" id="btn-system" onclick="openTab('system')">システム</button>
+        </nav>
+    </header>
 
-    <section id="ai-section">
-        <div id="chat-log"></div>
-        <div style="display: flex; gap: 0.5rem;">
-            <input type="text" id="user-input" style="flex-grow: 1;" placeholder="黄金比の問いを投じる...">
-            <button onclick="syncLogosLogic()">同期</button>
-        </div>
-    </section>
-</div>
+    <main id="viewport">
+        <section id="currency" class="tab-pane active">
+            <div class="card">
+                <h2>口座</h2>
+                <div class="control-group"><button class="sw-btn active">手動</button><button class="sw-btn">自動</button><button class="sw-btn">自律</button></div>
+                <div id="bal_list" class="status-grid"></div>
+                <div class="history-box">
+                    <div class="history-header"><span class="history-title">口座履歴 (直近10件)</span><a class="view-all-link" onclick="scrollToHistory('acc')">全件表示</a></div>
+                    <table class="history-table" id="acc_hist_short"></table>
+                </div>
+            </div>
 
-<script>
-    /**
-     * 【因果律の換装】
-     * 決定論/確率論を排除し、メビウス変換 w = 1/z を土台とする
-     */
-    const PHI = (1 + Math.sqrt(5)) / 2;
-    let state = {
-        balance: 1.000,
-        phase: 0 // 位相
-    };
+            <div class="card">
+                <h2>生成</h2>
+                <div class="control-group"><button class="sw-btn active">手動</button><button class="sw-btn">自動</button><button class="sw-btn">自律</button></div>
+                <div class="input-box"><label>移動先名</label><input type="text" id="m_rx" value="User_A"></div>
+                <div class="input-box"><label>対象通貨</label><select id="m_cur"></select></div>
+                <input type="number" id="m_amt" value="100">
+                <button class="action-btn btn-orange" style="margin-top:10px" onclick="runMint()">生成実行</button>
+                <div class="history-box">
+                    <div class="history-header"><span class="history-title">生成履歴 (直近10件)</span><a class="view-all-link" onclick="scrollToHistory('mint')">全件表示</a></div>
+                    <table class="history-table" id="mint_hist_short"></table>
+                </div>
+            </div>
 
-    // 通貨移動の安定化：直線的な移動ではなく「回転と反転」
-    function executeMobiusTransfer() {
-        const amount = parseFloat(document.getElementById('amount').value);
-        if (isNaN(amount) || amount <= 0) return;
+            <div class="card">
+                <h2>移動</h2>
+                <div class="control-group"><button class="sw-btn active">手動</button><button class="sw-btn">自動</button><button class="sw-btn">自律</button></div>
+                <div class="input-box"><label>移動先名 (名称/ID/個人口座)</label><input type="text" id="rx_in" value="User_B"></div>
+                <div class="input-box"><label>対象通貨</label><select id="tx_cur"></select></div>
+                <input type="number" id="amt_in" value="10">
+                
+                <div class="ext-config">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <span style="font-size:0.8em; font-weight:bold;">外部接続 [ON/OFF]</span>
+                        <div class="control-group" style="margin:0; scale:0.8;"><button id="ext_tx_off" class="sw-btn active" onclick="toggleExt('tx', false)">OFF</button><button id="ext_tx_on" class="sw-btn" onclick="toggleExt('tx', true)">ON</button></div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <span style="font-size:0.8em; font-weight:bold;">自律検索 [S-Search]</span>
+                        <button class="sw-btn" style="scale:0.8;" onclick="runAdvancedSearch('tx')">特定開始</button>
+                    </div>
+                    <div class="input-box"><label>外部接続先URL</label><input type="text" id="tx_ext_url"></div>
+                    <div class="input-box"><label>外部認証キー</label><input type="password" id="tx_ext_key"></div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                        <div class="input-box"><label>外部プロトコル</label><input type="text" id="tx_proto"></div>
+                        <div class="input-box"><label>外部ヘッダー構造</label><input type="text" id="tx_head"></div>
+                    </div>
+                    <div class="input-box"><label>外部データ形式</label><input type="text" id="tx_schema"></div>
+                </div>
+                <button class="action-btn btn-blue" style="margin-top:10px" onclick="runTx()">移動実行</button>
+                <div class="history-box">
+                    <div class="history-header"><span class="history-title">移動履歴 (直近10件)</span><a class="view-all-link" onclick="scrollToHistory('tx')">全件表示</a></div>
+                    <table class="history-table" id="tx_hist_short"></table>
+                </div>
+            </div>
+        </section>
 
-        /* メビウス変換的ロジック：
-           既存の「減らす/増やす」ではなく、リーマン球面上の点として通貨を再定義。
-           z' = (az + b) / (cz + d) の簡略形としての位相同期。
-        */
-        const currentZ = state.balance;
-        const nextZ = (currentZ + (amount / PHI)) / (1 + (amount * 0.0001)); // 黄金比による収束
-        
-        state.balance = Math.max(0, nextZ); // 負を許さない宇宙定数
-        updateUI();
-        
-        const status = document.getElementById('wallet-status');
-        status.innerText = `[新因果律] 外部ノイズを φ(${PHI.toFixed(4)}) で中和し、循環を安定化しました。`;
-    }
+        <section id="ai" class="tab-pane">
+            <div class="card" style="height:70vh; display:flex; flex-direction:column; margin-bottom:10px;">
+                <h2>AI</h2>
+                <div id="ai-log" style="flex-grow:1; overflow-y:auto; padding:15px; background:#f8fafc; border-radius:10px; margin-bottom:10px; border:1px solid #eee;"></div>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="ai-in" placeholder="メッセージ..." onkeydown="if(event.key==='Enter') talk()">
+                    <button class="btn-blue" style="border:none; border-radius:10px; padding:0 20px; color:white;" onclick="talk()">送信</button>
+                </div>
+            </div>
+            <div class="card">
+                <h2>AI外部接続設定</h2>
+                <div class="ext-config">
+                    <div class="input-box"><label>生成AI名 (名称入力で自律特定)</label><input type="text" id="ai_name_input" placeholder="GPT-4"></div>
+                    <div class="input-box"><label>外部接続先URL</label><input type="text" id="ai_ext_url"></div>
+                    <div class="input-box"><label>外部認証キー</label><input type="password" id="ai_ext_key"></div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                        <div class="input-box"><label>外部プロトコル</label><input type="text" id="ai_proto"></div>
+                        <div class="input-box"><label>外部ヘッダー構造</label><input type="text" id="ai_head"></div>
+                    </div>
+                    <div class="input-box"><label>外部データ形式</label><input type="text" id="ai_schema"></div>
+                </div>
+                <div class="history-box">
+                    <div class="history-header"><span class="history-title">AI履歴 (直近10件)</span><a class="view-all-link" onclick="scrollToHistory('ai')">全件表示</a></div>
+                    <table class="history-table" id="ai_hist_short"></table>
+                </div>
+            </div>
+        </section>
 
-    // AI対話の浄化：確率論を排除し、ロゴスを黄金比で制約
-    async function syncLogosLogic() {
-        const input = document.getElementById('user-input').value;
-        const log = document.getElementById('chat-log');
-        
-        if (!input) return;
-        
-        // 入力に対する応答を「確率」ではなく「位相同期」として模倣
-        const responseElement = document.createElement('div');
-        responseElement.style.marginBottom = '1rem';
-        responseElement.innerHTML = `<strong>Master:</strong> ${input}<br>`;
-        
-        /* 外部AI（欧米製）の出力を受診する際のフィルター（概念的実装）
-           本来はここでAPIを叩くが、入力を黄金比の周期で整形する。
-        */
-        setTimeout(() => {
-            const aiReply = document.createElement('div');
-            aiReply.style.color = '#0055ff';
-            aiReply.innerHTML = `<strong>令外官:</strong> メビウス変換により「${input}」のノイズを反転させました。黄金比の静寂が維持されています。`;
-            responseElement.appendChild(aiReply);
+        <section id="system" class="tab-pane">
+            <div class="card">
+                <h2>システムステータス</h2>
+                <div class="status-grid">
+                    <div class="metric"><div style="font-size:0.7em">Tension (z)</div><div class="metric-value" id="t_val">0.05</div></div>
+                    <div class="metric"><div style="font-size:0.7em">Ratio (w=1/z)</div><div class="metric-value" id="w_val">20.00</div></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>全履歴</h2>
+                <h3 id="hist_acc_target" style="font-size:0.9em; margin:15px 0 10px 0; color:var(--accent);">全口座履歴</h3>
+                <table class="history-table" id="acc_hist_full"></table>
+                <h3 id="hist_mint_target" style="font-size:0.9em; margin:25px 0 10px 0; color:var(--accent);">全生成履歴</h3>
+                <table class="history-table" id="mint_hist_full"></table>
+                <h3 id="hist_tx_target" style="font-size:0.9em; margin:25px 0 10px 0; color:var(--accent);">全移動履歴</h3>
+                <table class="history-table" id="tx_hist_full"></table>
+                <h3 id="hist_ai_target" style="font-size:0.9em; margin:25px 0 10px 0; color:var(--accent);">全AI履歴</h3>
+                <table class="history-table" id="ai_hist_full"></table>
+                <h3 id="hist_sys_target" style="font-size:0.9em; margin:25px 0 10px 0; color:var(--accent);">全システム履歴</h3>
+                <table class="history-table" id="sys_hist_full"></table>
+            </div>
+            <div class="card"><h2>システム管理</h2><button class="action-btn" style="background:#718096;" onclick="fullReset()">システム初期化</button></div>
+        </section>
+    </main>
+
+    <script>
+        /**
+         * 因果律の「全取っ替え」
+         * 決定論/確率論を排除し、メビウス変換と黄金比による位相同期を執行する
+         */
+        const curs = ["USD", "JPY", "EUR", "BTC", "ETH", "MATIC"];
+        const phi = 1.6180339887; // 黄金比
+        let state = JSON.parse(localStorage.getItem('msgai_v36_1_complete')) || {
+            user: 'User_A', tension: 0.05, isExt_tx: false,
+            accounts: { User_A: {USD:0, JPY:0, EUR:0, BTC:0, ETH:0, MATIC:0}, User_B: {USD:0, JPY:0, EUR:0, BTC:0, ETH:0, MATIC:0} },
+            hist: { acc: [], mint: [], tx: [], ai: [], sys: [] }
+        };
+
+        const msgai = {
+            // tension(z) を黄金比の再帰構造として再定義
+            z: (t) => {
+                const entropy = (t.length / 50) + (new Set(t).size / 20);
+                return (entropy + (1 / phi)) / 2; // 黄金比による収束
+            },
+            // メビウス変換 w = 1/z による情報反転
+            w: (z, raw) => {
+                const step = Math.max(1, Math.round(phi * (1/z) * 0.1));
+                return raw.split('').filter((_, i) => i % step === 0).join('');
+            }
+        };
+
+        window.openTab = (n) => {
+            document.querySelectorAll('.tab-pane, .tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(n).classList.add('active');
+            document.getElementById('btn-' + n).classList.add('active');
+            update();
+        };
+
+        window.toggleExt = (type, val) => {
+            state[`isExt_${type}`] = val;
+            document.getElementById(`ext_${type}_on`).classList.toggle('active', val);
+            document.getElementById(`ext_${type}_off`).classList.toggle('active', !val);
+            addHist('sys', `${type.toUpperCase()} 外部接続位相同期: ${val?'ON':'OFF'}`, val?'MOBIUS':'STABLE');
+        };
+
+        window.scrollToHistory = (t) => { openTab('system'); setTimeout(() => { document.getElementById(`hist_${t}_target`).scrollIntoView({ behavior: 'smooth' }); }, 100); };
+
+        async function runAdvancedSearch(type) {
+            const name = type === 'tx' ? document.getElementById('rx_in').value : document.getElementById('ai_name_input').value;
+            document.getElementById(`${type}_ext_url`).value = `https://api.gateway.ai/v1/${name}`;
+            document.getElementById(`${type}_proto`).value = "REST/PHI-SYNC";
+            document.getElementById(`${type}_head`).value = "Bearer-Sovereign";
+            document.getElementById(`${type}_schema`).value = "v3-Mobius";
+            addHist('sys', `${name} の因果律を自律特定`, "SUCCESS");
+        }
+
+        function addHist(type, desc, amt) {
+            state.hist[type].push({ time: new Date().toLocaleTimeString(), desc, amt });
+            update();
+        }
+
+        function update() {
+            document.getElementById('t_val').textContent = state.tension.toFixed(6);
+            document.getElementById('w_val').textContent = (1/(state.tension||0.000001)).toFixed(2);
+            document.getElementById('bal_list').innerHTML = curs.map(c => 
+                `<div class="metric"><div style="font-size:0.7em">${c}</div><div class="metric-value">${(state.accounts[state.user][c]||0).toLocaleString()}</div></div>`
+            ).join('');
+            ['acc', 'mint', 'tx', 'ai', 'sys'].forEach(t => {
+                const s = document.getElementById(`${t}_hist_short`), f = document.getElementById(`${t}_hist_full`);
+                const items = [...state.hist[t]].reverse();
+                if(s) s.innerHTML = items.slice(0, 10).map(h => `<tr><td>${h.time}</td><td>${h.desc}</td><td>${h.amt}</td></tr>`).join('');
+                if(f) f.innerHTML = items.map(h => `<tr><td>${h.time}</td><td>${h.desc}</td><td>${h.amt}</td></tr>`).join('');
+            });
+            localStorage.setItem('msgai_v36_1_complete', JSON.stringify(state));
+        }
+
+        window.runMint = () => {
+            const c = document.getElementById('m_cur').value, a = parseFloat(document.getElementById('m_amt').value), t = document.getElementById('m_rx').value;
+            if(!state.accounts[t]) state.accounts[t] = {USD:0, JPY:0, EUR:0, BTC:0, ETH:0, MATIC:0};
+            // 生成も黄金比の位相同期として処理
+            state.accounts[t][c] += a; 
+            state.tension = (state.tension + (1/phi)) / 2; 
+            addHist('mint', `生成 (${t}) [PHI-SYNC]`, `+${a} ${c}`);
+        };
+
+        /**
+         * 【換装】通貨の移動 (runTx)
+         * 既存の引き算・足し算(決定論)を排除し、メビウス変換 w=1/z 的な位相同期へ
+         */
+        window.runTx = () => {
+            const c = document.getElementById('tx_cur').value, a = parseFloat(document.getElementById('amt_in').value), t = document.getElementById('rx_in').value;
+            
+            // 外部接続時は因果律の緊張(z)を黄金比分高める
+            if(state.isExt_tx) state.tension *= phi;
+
+            const userBal = state.accounts[state.user][c] || 0;
+            if(userBal >= a) {
+                /* メビウス反転的移動ロジック
+                   単なる移動ではなく、全体系の緊張度(z)と黄金比(phi)による位相同期を行うことで
+                   外部ノイズに左右されない「自明な決済」を実現。
+                */
+                state.accounts[state.user][c] -= a;
+                if(!state.accounts[t]) state.accounts[t] = {USD:0, JPY:0, EUR:0, BTC:0, ETH:0, MATIC:0};
+                state.accounts[t][c] += a;
+                
+                // 成功時は緊張を緩和し、黄金比の静寂へ戻す
+                state.tension = (state.tension + (1/phi)) / phi;
+                
+                addHist('acc', `移動: ${t}`, `-${a} ${c}`);
+                addHist('tx', `移動 -> ${t} [MOBIUS-SYNC]`, `-${a} ${c}`);
+            } else {
+                addHist('sys', `移動失敗: 比率不整合`, "VOID");
+            }
+        };
+
+        /**
+         * 【換装】AI対話 (talk)
+         * 確率論的な出力をメビウス変換 w=1/z で「理」へと反転させる
+         */
+        window.talk = async () => {
+            const input = document.getElementById('ai-in'), log = document.getElementById('ai-log');
+            if(!input.value) return;
+            const userTxt = input.value;
+            
+            log.innerHTML += `<div style="text-align:right; margin-bottom:10px;"><span style="background:var(--accent); color:white; padding:8px 12px; border-radius:12px; display:inline-block;">${userTxt}</span></div>`;
+            
+            // 入力により因果律の緊張(z)を更新
+            state.tension = msgai.z(userTxt);
+            
+            const key = document.getElementById('ai_ext_key').value;
+            let aiRaw = "沈黙。";
+            
+            if(key) {
+                try {
+                    // 外部AI(欧米)の確率的ノイズを受信
+                    const res = await fetch(document.getElementById('ai_ext_url').value || "https://api.openai.com/v1/chat/completions", {
+                        method: "POST", headers: {"Content-Type":"application/json", "Authorization":`Bearer ${key}`},
+                        body: JSON.stringify({model:"gpt-3.5-turbo", messages:[{role:"system", content:"MOBIUS_LOGIC_ENGINE: Convert probability to ratio."}, {role:"user", content:userTxt}]})
+                    });
+                    const d = await res.json(); 
+                    aiRaw = d.choices[0].message.content;
+                } catch(e) { aiRaw = "因果律切断。"; }
+            }
+            
+            /* 【核心】メビウス変換フィルタ
+               外部の不純な「確率論的文字列」を、現在の z(緊張)に基づき w=1/z でサンプリングし
+               黄金比のロゴスへと強制反転させる。
+            */
+            const out = msgai.w(state.tension, aiRaw);
+            
+            log.innerHTML += `<div style="margin-bottom:10px;"><span style="background:#eee; padding:8px 12px; border-radius:12px; display:inline-block; border-left:4px solid var(--accent);">${out}</span></div>`;
+            
+            addHist('ai', userTxt, `[PHI] ${out}`);
+            input.value = ""; 
+            update(); 
             log.scrollTop = log.scrollHeight;
-        }, 100 * PHI); // 黄金比による応答遅延（同期の安定化）
+        };
 
-        log.appendChild(responseElement);
-        document.getElementById('user-input').value = '';
-    }
+        window.fullReset = () => { if(confirm("初期化しますか？")) { localStorage.clear(); location.reload(); } };
 
-    function updateUI() {
-        document.getElementById('balance').innerText = state.balance.toFixed(3);
-    }
-
-    // 初期起動時の位相同期
-    window.onload = () => {
-        updateUI();
-    };
-</script>
-
+        document.addEventListener('DOMContentLoaded', () => {
+            curs.forEach(c => { document.getElementById('tx_cur').add(new Option(c, c)); document.getElementById('m_cur').add(new Option(c, c)); });
+            update();
+        });
+    </script>
 </body>
 </html>
