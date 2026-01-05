@@ -3,235 +3,236 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MSGAI - System Core V36.7</title>
+<title>MSGAI - Sovereign V36.9</title>
 <style>
-/* STRUCTURAL DESIGN POLICY: 
-  BASED ON HARMONIC CONSTANT (1.618)
-  DO NOT REMOVE SUB-COMPONENTS 
-*/
+/* CORE ARCHITECTURE: LOGOS-BASED DESIGN */
 :root {
     --ratio: 1.6180339887;
     --accent: #007bff;
-    --bg: #f0f2f5;
+    --bg: #f8f9fa;
     --surface: #ffffff;
     --text: #1c1e21;
 }
 
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+body { font-family: 'Inter', system-ui, sans-serif; margin: 0; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-/* HEADER & NAVIGATION */
-header { background: #000; color: #fff; padding: 20px 0; flex-shrink: 0; border-bottom: 3px solid var(--accent); }
-.brand { text-align: center; font-size: 1.25rem; font-weight: 800; letter-spacing: 0.2em; }
-nav { display: flex; background: #1a1a1a; }
-.tab-trigger { flex: 1; padding: 15px; border: none; background: none; color: #888; font-weight: bold; cursor: pointer; border-bottom: 3px solid transparent; transition: 0.2s; }
-.tab-trigger.active { color: #fff; border-bottom-color: var(--accent); background: #222; }
+header { background: #000; color: #fff; padding: 12px 20px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent); }
+.brand { font-weight: 800; letter-spacing: 0.1em; font-size: 1rem; }
+.lang-selector { background: #222; color: #fff; border: 1px solid #444; font-size: 0.7rem; padding: 4px; border-radius: 4px; }
 
-/* VIEWPORT LAYOUT */
-#main-viewport { flex-grow: 1; overflow-y: auto; padding: 20px; box-sizing: border-box; }
+nav { display: flex; background: #111; }
+.tab { flex: 1; padding: 14px; border: none; background: none; color: #666; font-weight: bold; cursor: pointer; font-size: 0.75rem; border-bottom: 3px solid transparent; }
+.tab.active { color: #fff; border-bottom-color: var(--accent); background: #1a1a1a; }
+
+#viewport { flex-grow: 1; overflow-y: auto; padding: 15px; }
 .pane { display: none; width: 100%; max-width: 800px; margin: 0 auto; }
 .pane.active { display: block; }
 
-/* COMPONENT: CARD */
-.card { background: var(--surface); border-radius: 8px; border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-.card-title { font-size: 0.85rem; font-weight: 700; color: #606770; margin-bottom: 15px; text-transform: uppercase; border-left: 3px solid var(--accent); padding-left: 10px; }
+.card { background: var(--surface); border-radius: 10px; border: 1px solid #ddd; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+.card-title { font-size: 0.7rem; font-weight: 700; color: #999; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.05em; border-left: 3px solid var(--accent); padding-left: 10px; }
 
-/* COMPONENT: POLICY SELECTOR */
-.policy-group { display: flex; gap: 4px; margin-bottom: 15px; background: #f0f2f5; padding: 4px; border-radius: 6px; width: fit-content; }
-.policy-btn { padding: 6px 12px; font-size: 0.7rem; border: none; border-radius: 4px; cursor: pointer; background: none; color: #606770; font-weight: bold; }
-.policy-btn.active { background: var(--surface); color: var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.policy-group { display: flex; gap: 5px; margin-bottom: 15px; background: #f0f0f0; padding: 4px; border-radius: 6px; width: fit-content; }
+.policy-btn { padding: 6px 12px; font-size: 0.65rem; border: none; border-radius: 4px; cursor: pointer; color: #888; background: none; transition: 0.2s; }
+.policy-btn.active { background: #fff; color: var(--accent); font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 
-/* DATA VISUALIZATION */
-.data-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; }
-.data-box { background: #f8f9fa; border: 1px solid #e9ecef; padding: 12px; border-radius: 6px; text-align: center; }
-.data-label { font-size: 0.65rem; color: #90949c; margin-bottom: 5px; }
-.data-value { font-family: "SFMono-Regular", Consolas, monospace; font-weight: bold; font-size: 1rem; }
+.data-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; }
+.data-node { background: #fafafa; border: 1px solid #eee; padding: 12px; border-radius: 8px; text-align: center; }
+.label { font-size: 0.6rem; color: #aaa; margin-bottom: 4px; }
+.value { font-family: 'Consolas', monospace; font-weight: bold; font-size: 1rem; }
 
-/* INPUT & ACTION */
-input, select { width: 100%; padding: 12px; border: 1px solid #ccd0d5; border-radius: 6px; margin-bottom: 10px; box-sizing: border-box; font-size: 1rem; }
-.action-btn { width: 100%; padding: 14px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-.btn-synthesis { background: #f02849; color: white; }
-.btn-adjustment { background: var(--accent); color: white; }
+input, select { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 0.9rem; }
+.btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: #fff; transition: 0.2s; }
+.btn-primary { background: var(--accent); }
+.btn-danger { background: #e03131; }
 
-/* TRACE SYSTEM (Logging) */
-.trace-area { margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; }
-.trace-table { width: 100%; font-size: 0.7rem; border-collapse: collapse; }
-.trace-table td { padding: 4px 0; border-bottom: 1px solid #f2f3f5; }
+#console { background: #000; color: #00ff41; padding: 15px; font-family: monospace; font-size: 0.8rem; height: 300px; overflow-y: auto; border-radius: 6px; margin-bottom: 10px; }
 </style>
 </head>
 <body>
 
 <header>
-    <div class="brand">SYSTEM SOVEREIGN V36.7</div>
-    <nav>
-        <button class="tab-trigger active" onclick="switchPane('pane-asset')">ASSET</button>
-        <button class="tab-trigger" onclick="switchPane('pane-transform')">TRANSFORM</button>
-        <button class="tab-trigger" onclick="switchPane('pane-monitor')">MONITOR</button>
-    </nav>
+    <div class="brand">MSGAI V36.9</div>
+    <select class="lang-selector" id="lang-policy" onchange="changeLang()">
+        <option value="en">English (System)</option>
+        <option value="jp">日本語 (Logos)</option>
+        <option value="zh">简体中文 (Structure)</option>
+        <option value="ko">한국어 (Causality)</option>
+        <option value="fr">Français (Valeur)</option>
+        <option value="de">Deutsch (Ordnung)</option>
+    </select>
 </header>
 
-<main id="main-viewport">
-    <section id="pane-asset" class="pane active">
-        <div class="card">
-            <div class="card-title">Balance Ledger</div>
-            <div id="ledger-display" class="data-grid"></div>
-        </div>
+<nav>
+    <button class="tab active" id="tab-asset" onclick="showPane('asset')">ASSET</button>
+    <button class="tab" id="tab-transform" onclick="showPane('transform')">TRANSFORM</button>
+    <button class="tab" id="tab-monitor" onclick="showPane('monitor')">MONITOR</button>
+</nav>
 
+<main id="viewport">
+    <section id="asset" class="pane active">
         <div class="card">
-            <div class="card-title">Asset Synthesis</div>
+            <div class="card-title" data-key="title_ledger">Ledger Status</div>
+            <div id="ledger-grid" class="data-grid"></div>
+        </div>
+        <div class="card">
+            <div class="card-title" data-key="title_synth">Synthesis</div>
             <div class="policy-group">
-                <button class="policy-btn active" onclick="setPolicy('synthesis', 'manual')">MANUAL</button>
-                <button class="policy-btn" onclick="setPolicy('synthesis', 'scheduled')">SCHEDULED</button>
-                <button class="policy-btn" onclick="setPolicy('synthesis', 'ruled')">RULED</button>
+                <button class="policy-btn active" data-key="mode_man" onclick="setMode('man')">MANUAL</button>
+                <button class="policy-btn" data-key="mode_auto" onclick="setMode('auto')">AUTO</button>
+                <button class="policy-btn" data-key="mode_autonomous" onclick="setMode('autonomous')">AUTONOMOUS</button>
             </div>
-            <select id="syn-target"></select>
+            <select id="syn-asset"></select>
             <input type="number" id="syn-amount" value="100">
-            <button class="action-btn btn-synthesis" onclick="runSynthesis()">EXECUTE SYNTHESIS</button>
-            <div class="trace-area">
-                <table class="trace-table" id="syn-trace"></table>
-            </div>
+            <button class="btn btn-danger" data-key="btn_syn" onclick="doSynth()">EXECUTE</button>
         </div>
+    </section>
 
+    <section id="transform" class="pane">
         <div class="card">
-            <div class="card-title">Corrective Adjustment</div>
-            <input type="text" id="adj-destination" placeholder="Destination ID">
-            <select id="adj-target"></select>
-            <input type="number" id="adj-amount" value="10">
-            <button class="action-btn btn-adjustment" onclick="runAdjustment()">EXECUTE ADJUSTMENT</button>
-            <div class="trace-area">
-                <table class="trace-table" id="adj-trace"></table>
+            <div class="card-title" data-key="title_transform">Logos Transform</div>
+            <div id="console"></div>
+            <div style="display: flex; gap: 8px; margin-top:10px;">
+                <input type="text" id="engine-in" placeholder="..." onkeydown="if(event.key==='Enter') doTransform()">
+                <button class="btn btn-primary" style="width: 80px;" data-key="btn_send" onclick="doTransform()">SEND</button>
             </div>
         </div>
     </section>
 
-    <section id="pane-transform" class="pane">
-        <div class="card" style="height: 60vh; display: flex; flex-direction: column;">
-            <div class="card-title">Transform Engine (Analysis)</div>
-            <div id="engine-out" style="flex-grow: 1; background: #1c1e21; color: #31a24c; padding: 15px; font-family: monospace; font-size: 0.8rem; overflow-y: auto; border-radius: 4px; margin-bottom: 10px;"></div>
-            <div style="display: flex; gap: 8px;">
-                <input type="text" id="engine-in" placeholder="Input Data Sequence..." onkeydown="if(event.key==='Enter') runTransform()">
-                <button class="action-btn btn-adjustment" style="width: 80px; padding: 0;" onclick="runTransform()">SEND</button>
-            </div>
-        </div>
-    </section>
-
-    <section id="pane-monitor" class="pane">
+    <section id="monitor" class="pane">
         <div class="card">
-            <div class="card-title">Telemetrics</div>
+            <div class="card-title" data-key="title_monitor">Integrity Monitor</div>
             <div class="data-grid">
-                <div class="data-box"><div class="data-label">Coefficient (z)</div><div class="data-value" id="z-val">0</div></div>
-                <div class="data-box"><div class="data-label">Harmonic Ratio (w)</div><div class="data-value" id="w-val">0</div></div>
+                <div class="data-node"><div class="label" data-key="label_z">Tension (z)</div><div class="value" id="z-val">0</div></div>
+                <div class="data-node"><div class="label" data-key="label_w">Harmonic Ratio (w)</div><div class="value" id="w-val">0</div></div>
             </div>
         </div>
         <div class="card">
-            <div class="card-title">System Normalization</div>
-            <button class="action-btn" style="background:#8a8d91; color:white; margin-bottom:8px;" onclick="resetSub('accounts')">PURGE LEDGER</button>
-            <button class="action-btn" style="background:#8a8d91; color:white; margin-bottom:8px;" onclick="resetSub('hist')">PURGE HISTORY</button>
-            <button class="action-btn" style="background:#1c1e21; color:white;" onclick="fullReset()">SYSTEM RE-INITIALIZATION</button>
+            <div class="card-title" data-key="title_purge">Normalization</div>
+            <button class="btn btn-primary" style="background:#888; margin-bottom:10px;" data-key="btn_reset_ledger" onclick="resetPart('accounts')">Reset Ledger</button>
+            <button class="btn btn-danger" data-key="btn_reset_all" onclick="fullReset()">Full Re-initialization</button>
         </div>
     </section>
 </main>
 
 <script>
-/* INTERNAL CORE LOGIC: 
-  DO NOT MODIFY TRANSFORMATION RATIOS 
-*/
 const ASSETS = ["USD","JPY","EUR","BTC","ETH","MATIC"];
 const PHI = 1.6180339887;
 
-const initStore = () => ({
-    z: 0.05,
-    accounts: { User_A: Object.fromEntries(ASSETS.map(a => [a, 0])), User_B: Object.fromEntries(ASSETS.map(a => [a, 0])) },
-    hist: { mint: [], tx: [], ai: [] },
-    policies: { synthesis: 'manual', data: 'user' }
-});
+const DICTIONARY = {
+    en: {
+        title_ledger: "Ledger Status", title_synth: "Value Synthesis", btn_syn: "EXECUTE SYNTHESIS",
+        title_transform: "Logos Transform", btn_send: "SEND", title_monitor: "Integrity Monitor",
+        label_z: "Tension (z)", label_w: "Harmonic Ratio (w)", title_purge: "Normalization",
+        btn_reset_ledger: "Reset Ledger", btn_reset_all: "Full Reset",
+        mode_man: "MANUAL", mode_auto: "AUTO", mode_autonomous: "AUTONOMOUS"
+    },
+    jp: {
+        title_ledger: "均衡状態 / 台帳", title_synth: "事象生成 / 統合", btn_syn: "現出（Execute）",
+        title_transform: "因果変換律（Logos）", btn_send: "投射", title_monitor: "理（ロゴス）の観測",
+        label_z: "緊張度 (z)", label_w: "調和比 (w)", title_purge: "原点回帰 / 浄化",
+        btn_reset_ledger: "台帳を零に戻す", btn_reset_all: "全系の浄化（再起動）",
+        mode_man: "個の意志", mode_auto: "律動", mode_autonomous: "自律微細ロゴス"
+    },
+    zh: {
+        title_ledger: "均衡状态 / 账本", title_synth: "事象生成 / 综合", btn_syn: "显现（Execute）",
+        title_transform: "因果转换律", btn_send: "投射", title_monitor: "理（Logos）的观测",
+        label_z: "紧张度 (z)", label_w: "调和比 (w)", title_purge: "原点回归 / 净化",
+        btn_reset_ledger: "账本清零", btn_reset_all: "全系统净化",
+        mode_man: "个人意志", mode_auto: "律动", mode_autonomous: "自律逻辑"
+    },
+    ko: {
+        title_ledger: "균형 상태 / 장부", title_synth: "사상 생성 / 통합", btn_syn: "현현（Execute）",
+        title_transform: "인과 변환율", btn_send: "투사", title_monitor: "이(Logos)의 관측",
+        label_z: "긴장도 (z)", label_w: "조화비 (w)", title_purge: "원점 회귀 / 정화",
+        btn_reset_ledger: "장부 초기화", btn_reset_all: "전계 정화（재기동）",
+        mode_man: "개인의 의지", mode_auto: "율동", mode_autonomous: "자율적 로고스"
+    },
+    fr: {
+        title_ledger: "État du Grand Livre", title_synth: "Synthèse de Valeur", btn_syn: "EXÉCUTER",
+        title_transform: "Moteur de Logos", btn_send: "ENVOYER", title_monitor: "Moniteur d'Intégrité",
+        label_z: "Tension (z)", label_w: "Rapport Harmonique (w)", title_purge: "Normalisation",
+        btn_reset_ledger: "Réinitialiser", btn_reset_all: "Réinitialisation Totale",
+        mode_man: "MANUEL", mode_auto: "AUTO", mode_autonomous: "AUTONOME"
+    },
+    de: {
+        title_ledger: "Kontostand", title_synth: "Wertsynthese", btn_syn: "AUSFÜHREN",
+        title_transform: "Logos-Engine", btn_send: "SENDEN", title_monitor: "Integritätsmonitor",
+        label_z: "Spannung (z)", label_w: "Harmonisches Verhältnis (w)", title_purge: "Normalisierung",
+        btn_reset_ledger: "Konten zurücksetzen", btn_reset_all: "Vollständige Reinigung",
+        mode_man: "MANUELL", mode_auto: "AUTO", mode_autonomous: "AUTONOM"
+    }
+};
 
-let state = JSON.parse(localStorage.getItem('msgai_sov_v36_core')) || initStore();
+let state = JSON.parse(localStorage.getItem('msgai_v36_9_core')) || {
+    z: 0.05, accounts: { User_A: Object.fromEntries(ASSETS.map(a => [a, 0])) },
+    hist: { mint: [], ai: [] }, lang: 'en', mode: 'man'
+};
 
-const transformZ = (v) => typeof v === "string" ? (v.length/50) + (new Set(v).size/20) : v/100;
-const transformW = (z) => PHI / (z || 0.000001);
+const getW = (z) => PHI / (z || 0.000001);
 
-function refresh() {
-    const w = transformW(state.z);
+function updateUI() {
+    const lang = state.lang || 'en';
+    document.querySelectorAll('[data-key]').forEach(el => {
+        const key = el.getAttribute('data-key');
+        if(DICTIONARY[lang][key]) el.textContent = DICTIONARY[lang][key];
+    });
+
     document.getElementById('z-val').textContent = state.z.toFixed(6);
-    document.getElementById('w-val').textContent = w.toFixed(2);
-    
-    document.getElementById('ledger-display').innerHTML = ASSETS.map(a => `
-        <div class="data-box"><div class="data-label">${a}</div><div class="data-value">${(state.accounts.User_A[a] || 0).toFixed(4)}</div></div>
+    document.getElementById('w-val').textContent = getW(state.z).toFixed(2);
+    document.getElementById('ledger-grid').innerHTML = ASSETS.map(a => `
+        <div class="data-node"><div class="label">${a}</div><div class="value">${(state.accounts.User_A[a] || 0).toFixed(4)}</div></div>
     `).join('');
 
-    ['mint', 'tx'].forEach(key => {
-        const el = document.getElementById(key === 'mint' ? 'syn-trace' : 'adj-trace');
-        if(el) el.innerHTML = state.hist[key].slice(-3).reverse().map(h => `
-            <tr><td>${h.t}</td><td>${h.d}</td><td style="text-align:right">w:${h.w}</td></tr>
-        `).join('');
-    });
-
-    localStorage.setItem('msgai_sov_v36_core', JSON.stringify(state));
+    localStorage.setItem('msgai_v36_9_core', JSON.stringify(state));
 }
 
-function runSynthesis() {
-    const asset = document.getElementById('syn-target').value;
+function changeLang() {
+    state.lang = document.getElementById('lang-policy').value;
+    updateUI();
+}
+
+function setMode(m) {
+    state.mode = m;
+    document.querySelectorAll('.policy-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    updateUI();
+}
+
+function doSynth() {
+    const asset = document.getElementById('syn-asset').value;
     const amt = parseFloat(document.getElementById('syn-amount').value);
-    const z = transformZ(asset + amt);
-    const w = transformW(z);
+    const z = (asset.length/40) + (amt/1000);
+    const w = getW(z);
     state.accounts.User_A[asset] += w;
-    state.z += (z / 10);
-    state.hist.mint.push({ t: new Date().toLocaleTimeString(), d: `SYN:${asset}`, w: w.toFixed(4) });
-    refresh();
+    state.z += (z / 8);
+    updateUI();
 }
 
-function runAdjustment() {
-    const asset = document.getElementById('adj-target').value;
-    const amt = parseFloat(document.getElementById('adj-amount').value);
-    const dest = document.getElementById('adj-destination').value || "User_B";
-    const z = transformZ(asset + amt);
-    const w = transformW(z);
-    if(state.accounts.User_A[asset] >= w) {
-        state.accounts.User_A[asset] -= w;
-        if(!state.accounts[dest]) state.accounts[dest] = Object.fromEntries(ASSETS.map(a => [a, 0]));
-        state.accounts[dest][asset] += w;
-        state.z += (z / 5);
-        state.hist.tx.push({ t: new Date().toLocaleTimeString(), d: `ADJ:${dest}`, w: w.toFixed(4) });
-        refresh();
-    } else { alert("Operational Error: Insufficient Ratio"); }
-}
-
-function runTransform() {
+function doTransform() {
     const input = document.getElementById('engine-in');
     const msg = input.value; if(!msg) return;
-    const z = transformZ(msg);
-    const w = transformW(z);
-    const out = document.getElementById('engine-out');
-    out.innerHTML += `<div>[INPUT] ${msg} <span style="color:#2d88ff">-> w:${w.toFixed(4)}</span></div>`;
+    const z = (msg.length/30);
+    const w = getW(z);
+    const con = document.getElementById('console');
+    con.innerHTML += `<div>> [PROJECTION] ${msg} <span style="color:var(--accent)">[w:${w.toFixed(2)}]</span></div>`;
     input.value = '';
-    state.hist.ai.push({ t: new Date().toLocaleTimeString(), d: msg.substring(0, 15), w: w.toFixed(4) });
     state.z += z;
-    refresh();
-    out.scrollTop = out.scrollHeight;
+    updateUI();
+    con.scrollTop = con.scrollHeight;
 }
 
-function fullReset() { if(confirm("Confirm Full Reset?")) { state = initStore(); document.getElementById('engine-out').innerHTML = ""; refresh(); } }
-function resetSub(p) { if(confirm(`Confirm Purge ${p}?`)) { state[p] = initStore()[p]; refresh(); } }
-
-function switchPane(id) {
-    document.querySelectorAll('.pane, .tab-trigger').forEach(el => el.classList.remove('active'));
+function showPane(id) {
+    document.querySelectorAll('.pane, .tab').forEach(el => el.classList.remove('active'));
     document.getElementById(id).classList.add('active');
-    event.target.classList.add('active');
+    document.getElementById('tab-' + id).classList.add('active');
 }
 
-function setPolicy(group, val) {
-    state.policies[group] = val;
-    document.querySelectorAll(`.policy-group button`).forEach(b => b.classList.remove('active'));
-    event.target.classList.add('active');
-    refresh();
-}
+function fullReset() { if(confirm("Full Reset?")) { localStorage.clear(); location.reload(); } }
 
 document.addEventListener('DOMContentLoaded', () => {
-    ASSETS.forEach(a => {
-        document.getElementById('syn-target').add(new Option(a, a));
-        document.getElementById('adj-target').add(new Option(a, a));
-    });
-    refresh();
+    ASSETS.forEach(a => document.getElementById('syn-asset').add(new Option(a, a)));
+    document.getElementById('lang-policy').value = state.lang;
+    updateUI();
 });
 </script>
 </body>
