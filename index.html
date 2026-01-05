@@ -3,210 +3,191 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MSGAI - Sovereign V36.2 φ完全版</title>
+<title>MSGAI - Sovereign V36.3 φ真・完全版</title>
 <style>
 :root{--accent:#007bff;--bg:#f4f7f9;--card-bg:#fff;--nav-bg:#000;--phi:1.618;}
-body{font-family:'Segoe UI',sans-serif;margin:0;background:var(--bg);color:#1a1a1a;display:flex;flex-direction:column;height:100vh;overflow:hidden;transition: opacity 1.618s ease-in;}
+body{font-family:'Segoe UI',sans-serif;margin:0;background:var(--bg);color:#1a1a1a;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
 header{background:var(--nav-bg);color:#fff;flex-shrink:0;border-bottom: 2px solid var(--accent);}
 .header-top{display:flex;justify-content:center;padding:25px 0;}
-.logo-text{font-size:1.6em;font-weight:bold;letter-spacing:8px;color:var(--accent);cursor:pointer;text-shadow: 0 0 10px rgba(0,123,255,0.3);}
+.logo-text{font-size:1.6em;font-weight:bold;letter-spacing:8px;color:var(--accent);cursor:pointer;}
 .tab-menu{display:flex;background:#111;}
-.tab-btn{background:none;border:none;color:#666;padding:18px 0;cursor:pointer;font-weight:bold;flex:1;font-size:1.1em;border-bottom:4px solid transparent;transition: 0.382s;}
+.tab-btn{background:none;border:none;color:#666;padding:18px 0;cursor:pointer;font-weight:bold;flex:1;font-size:1.1em;border-bottom:4px solid transparent;}
 .tab-btn.active{color:#fff;border-bottom:4px solid var(--accent);background:#1a1a1a;}
 #viewport{flex-grow:1;overflow-y:auto;padding:20px;padding-bottom:150px;}
 .tab-pane{display:none;width:100%;max-width:800px;margin:0 auto;}
 .tab-pane.active{display:block;}
-.card{background:var(--card-bg);border-radius:16px;padding:20px;box-shadow:0 4px 15px rgba(0,0,0,0.05);border:1px solid #e1e4e8;margin-bottom:20px;transform:translateY(0);transition: all 0.618s cubic-bezier(0.165, 0.84, 0.44, 1);}
+.card{background:var(--card-bg);border-radius:16px;padding:20px;box-shadow:0 4px 15px rgba(0,0,0,0.05);border:1px solid #e1e4e8;margin-bottom:20px;}
 h2{margin:0 0 15px 0;font-size:1.1em;border-left:5px solid var(--accent);padding-left:12px;display:flex;justify-content:space-between;align-items:center;}
-.control-group{display:flex;background:#eee;border-radius:8px;padding:3px;margin-bottom:15px;width:fit-content;}
-.sw-btn{border:none;background:none;padding:6px 12px;font-size:0.75em;font-weight:bold;cursor:pointer;border-radius:6px;color:#888;transition:0.2s;}
-.sw-btn.active{background:var(--accent);color:#fff;box-shadow:0 2px 4px rgba(0,0,0,0.1);}
 .status-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;}
-.metric{background:#f8fafc;padding:12px;border-radius:10px;border:1px solid #edf2f7;text-align:center;transition: 0.618s;}
+.metric{background:#f8fafc;padding:12px;border-radius:10px;border:1px solid #edf2f7;text-align:center;}
 .metric-value{font-size:1.2em;font-weight:bold;font-family:'Consolas',monospace;}
 .input-box{margin-bottom:12px;}
 label{font-size:0.7em;font-weight:bold;color:#718096;display:block;margin-bottom:4px;}
-input,select{width:100%;padding:12px;border:1px solid #cbd5e0;border-radius:8px;font-size:16px;box-sizing:border-box;background:#fff;}
-.action-btn{width:100%;padding:16px;border:none;border-radius:12px;color:#fff;font-weight:bold;font-size:1.1em;cursor:pointer;transition: 0.382s;}
+input,select{width:100%;padding:12px;border:1px solid #cbd5e0;border-radius:8px;font-size:16px;box-sizing:border-box;}
+.action-btn{width:100%;padding:16px;border:none;border-radius:12px;color:#fff;font-weight:bold;font-size:1.1em;cursor:pointer;}
 .btn-orange{background:#fd7e14;}
 .btn-blue{background:var(--accent);}
 .history-box{margin-top:15px;border-top:1px solid #eee;padding-top:10px;}
+.history-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.history-title{font-size:0.8em;font-weight:bold;color:#718096;}
+.view-all-link{font-size:0.75em;color:var(--accent);text-decoration:none;cursor:pointer;font-weight:bold;}
 .history-table{width:100%;font-size:0.75em;border-collapse:collapse;}
 .history-table td{padding:6px 0;border-bottom:1px solid #f8f9fa;}
-#logos-live-log::-webkit-scrollbar{width:5px;}
-#logos-live-log::-webkit-scrollbar-thumb{background:var(--accent);border-radius:10px;}
+/* モーダルスタイル */
+#modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:1000;justify-content:center;align-items:center;backdrop-filter:blur(5px);}
+.modal-content{background:#fff;width:90%;max-width:600px;max-height:80vh;border-radius:20px;padding:25px;overflow-y:auto;}
 </style>
 </head>
 <body>
+
 <header>
-<div class="header-top"><div class="logo-text" onclick="openTab('currency')">MSGAI SOVEREIGN φ</div></div>
-<nav class="tab-menu">
-<button class="tab-btn active" id="btn-currency" onclick="openTab('currency')">通貨</button>
-<button class="tab-btn" id="btn-ai" onclick="openTab('ai')">AI</button>
-<button class="tab-btn" id="btn-system" onclick="openTab('system')">システム</button>
-</nav>
+    <div class="header-top"><div class="logo-text" onclick="openTab('currency')">MSGAI SOVEREIGN φ</div></div>
+    <nav class="tab-menu">
+        <button class="tab-btn active" id="btn-currency" onclick="openTab('currency')">通貨</button>
+        <button class="tab-btn" id="btn-ai" onclick="openTab('ai')">AI</button>
+        <button class="tab-btn" id="btn-system" onclick="openTab('system')">システム</button>
+    </nav>
 </header>
+
 <main id="viewport">
-<section id="currency" class="tab-pane active">
-<div class="card">
-<h2>口座 <span style="font-size:0.6em; color:var(--accent);">Root/Zero-Point</span></h2>
-<div class="control-group"><button class="sw-btn active">手動</button><button class="sw-btn">自動</button><button class="sw-btn">自律</button></div>
-<div id="bal_list" class="status-grid"></div>
-<div class="history-box">
-<table class="history-table" id="acc_hist_short"></table>
-</div>
-</div>
-<div class="card">
-<h2>生成 (w=1/z)</h2>
-<div class="input-box"><label>対象通貨</label><select id="m_cur"></select></div>
-<input type="number" id="m_amt" value="100">
-<button class="action-btn btn-orange" style="margin-top:10px" onclick="runMint()">真理生成実行</button>
-</div>
-<div class="card">
-<h2>移動 (メビウス反転)</h2>
-<div class="input-box"><label>移動先</label><input type="text" id="rx_in" value="User_B"></div>
-<div class="input-box"><label>対象通貨</label><select id="tx_cur"></select></div>
-<input type="number" id="amt_in" value="10">
-<button class="action-btn btn-blue" style="margin-top:10px" onclick="runTx()">補正移動実行</button>
-</div>
-</section>
+    <section id="currency" class="tab-pane active">
+        <div class="card">
+            <h2>口座</h2>
+            <div id="bal_list" class="status-grid"></div>
+            <div class="history-box">
+                <div class="history-header"><span class="history-title">最近の移動履歴</span><a class="view-all-link" onclick="showFullHist('tx')">全履歴表示</a></div>
+                <table class="history-table" id="tx_hist_short"></table>
+            </div>
+        </div>
 
-<section id="ai" class="tab-pane">
-<div class="card" style="height:70vh;display:flex;flex-direction:column;">
-<h2>AIロゴス・フィルター</h2>
-<div id="ai-log" style="flex-grow:1;overflow-y:auto;padding:15px;background:#0b0e14;color:#00ff41;border-radius:10px;margin-bottom:10px;font-family:'Consolas',monospace;"></div>
-<div style="display:flex;gap:10px;"><input type="text" id="ai-in" placeholder="外部情報の注入..." onkeydown="if(event.key==='Enter') talk()"><button class="action-btn btn-blue" style="width:80px;padding:0;" onclick="talk()">変換</button></div>
-</div>
-</section>
+        <div class="card">
+            <h2>真理生成 (Mint)</h2>
+            <div class="input-box"><label>対象通貨</label><select id="m_cur"></select></div>
+            <input type="number" id="m_amt" value="100">
+            <button class="action-btn btn-orange" style="margin-top:10px" onclick="runMint()">生成実行</button>
+            <div class="history-box">
+                <div class="history-header"><span class="history-title">最近の生成履歴</span><a class="view-all-link" onclick="showFullHist('mint')">全履歴表示</a></div>
+                <table class="history-table" id="mint_hist_short"></table>
+            </div>
+        </div>
 
-<section id="system" class="tab-pane">
-<div class="card">
-<h2>システム・コア・ステータス</h2>
-<div class="status-grid">
-<div class="metric"><div style="font-size:0.7em">Tension (z)</div><div class="metric-value" id="t_val">0.05</div></div>
-<div class="metric"><div style="font-size:0.7em">Ratio (w=φ/z)</div><div class="metric-value" id="w_val">32.36</div></div>
-</div>
-</div>
-<div class="card" id="logos-monitor" style="border: 2px solid var(--accent); background: #050505; color: #fff;">
-<h2>ロゴス監視モニター <span id="alert-pulse" style="width:12px;height:12px;background:#28a745;border-radius:50%;display:inline-block;margin-left:10px;box-shadow: 0 0 10px #28a745;"></span></h2>
-<div id="logos-warning" style="font-size:0.8em; color:#ff4b4b; margin-bottom:10px; font-weight:bold; display:none; text-align:center;">⚠️ 外部ノイズの非調和（Dissonance）を検知</div>
-<div class="status-grid" style="color:#000;">
-<div class="metric" style="background:#111; color:#ff4b4b; border-color:#333;"><div style="font-size:0.7em">外部乖離率 (Chaos)</div><div class="metric-value" id="chaos_val">0.00%</div></div>
-<div class="metric" style="background:#111; color:#00ff41; border-color:#333;"><div style="font-size:0.7em">内部調和度 (Purity)</div><div class="metric-value" id="purity_val">100.00%</div></div>
-</div>
-<div style="margin-top:15px; background:#000; color:#0f0; padding:10px; border-radius:8px; font-family:'Consolas',monospace; font-size:0.75em; height:150px; overflow-y:auto; border:1px solid #333;" id="logos-live-log">
-> System Initialized...<br>
-> Monitoring Inverse Connections (w=1/z)...
-</div>
-</div>
-</section>
+        <div class="card">
+            <h2>補正移動 (Transfer)</h2>
+            <div class="input-box"><label>移動先</label><input type="text" id="rx_in" value="User_B"></div>
+            <div class="input-box"><label>対象通貨</label><select id="tx_cur"></select></div>
+            <input type="number" id="amt_in" value="10">
+            <button class="action-btn btn-blue" style="margin-top:10px" onclick="runTx()">移動実行</button>
+        </div>
+    </section>
+
+    <section id="ai" class="tab-pane">
+        <div class="card" style="height:70vh;display:flex;flex-direction:column;">
+            <h2>AIロゴス・フィルター</h2>
+            <div id="ai-log" style="flex-grow:1;overflow-y:auto;padding:15px;background:#0b0e14;color:#00ff41;border-radius:10px;margin-bottom:10px;font-family:'Consolas',monospace;"></div>
+            <div style="display:flex;gap:10px;">
+                <input type="text" id="ai-in" placeholder="メッセージ注入..." onkeydown="if(event.key==='Enter') talk()">
+                <button class="action-btn btn-blue" style="width:80px;padding:0;" onclick="talk()">変換</button>
+            </div>
+            <div class="history-header" style="margin-top:10px;"><span class="history-title">対話ログ解析</span><a class="view-all-link" onclick="showFullHist('ai')">全ログ表示</a></div>
+        </div>
+    </section>
+
+    <section id="system" class="tab-pane">
+        <div class="card">
+            <h2>コア・ステータス</h2>
+            <div class="status-grid">
+                <div class="metric"><div>Tension (z)</div><div class="metric-value" id="t_val">0.05</div></div>
+                <div class="metric"><div>Ratio (w)</div><div class="metric-value" id="w_val">32.36</div></div>
+            </div>
+        </div>
+        <div class="card" id="logos-monitor" style="background:#000; color:#fff; border:2px solid var(--accent);">
+            <h2>ロゴス監視モニター <span id="alert-pulse" style="width:12px;height:12px;background:#28a745;border-radius:50%;display:inline-block;"></span></h2>
+            <div class="status-grid" style="color:#000; margin-top:10px;">
+                <div class="metric" style="background:#111; color:#ff4b4b;"><div style="font-size:0.7em">Chaos</div><div id="chaos_val" class="metric-value">0%</div></div>
+                <div class="metric" style="background:#111; color:#00ff41;"><div style="font-size:0.7em">Purity</div><div id="purity_val" class="metric-value">100%</div></div>
+            </div>
+            <div id="logos-live-log" style="margin-top:15px; background:#000; color:#0f0; padding:10px; font-family:monospace; font-size:0.7em; height:100px; overflow-y:auto; border:1px solid #333;"></div>
+        </div>
+    </section>
 </main>
+
+<div id="modal-overlay" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h2 id="modal-title">全履歴</h2>
+        <table class="history-table" id="modal-table"></table>
+        <button class="action-btn btn-blue" style="margin-top:20px" onclick="closeModal()">閉じる</button>
+    </div>
+</div>
 
 <script>
 const curs = ["USD","JPY","EUR","BTC","ETH","MATIC"];
 const phi = 1.6180339887;
-let state = JSON.parse(localStorage.getItem('msgai_sovereign_v36')) || {
-    user:'User_A', tension:0.05, accounts:{User_A:{},User_B:{}}, hist:{acc:[], mint:[], tx:[], ai:[], sys:[]}
+let state = JSON.parse(localStorage.getItem('msgai_v36_final')) || {
+    tension:0.05, accounts:{User_A:{},User_B:{}}, hist:{mint:[], tx:[], ai:[]}
 };
 curs.forEach(c=>{ if(!state.accounts.User_A[c]) state.accounts.User_A[c]=0; if(!state.accounts.User_B[c]) state.accounts.User_B[c]=0; });
 
-function MSGAI_z(v){ return typeof v==="string" ? (v.length/50)+(new Set(v).size/20) : v/100; }
-function MSGAI_w(z){ return phi/(z||0.000001); }
-
-function openTab(n){
-    document.querySelectorAll('.tab-pane,.tab-btn').forEach(el=>el.classList.remove('active'));
-    document.getElementById(n).classList.add('active');
-    document.getElementById('btn-'+n).classList.add('active');
-    update(); animateCards();
-}
-
-function animateCards(){
-    const cards = document.querySelectorAll('.tab-pane.active .card');
-    cards.forEach((c,i)=>{
-        c.style.opacity=0; c.style.transform='translateY(20px)';
-        setTimeout(()=>{ c.style.opacity=1; c.style.transform='translateY(0)'; }, i*100);
-    });
-}
+const MSGAI_z = v => typeof v==="string" ? (v.length/50)+(new Set(v).size/20) : v/100;
+const MSGAI_w = z => phi/(z||0.000001);
 
 function update(){
-    const currentW = MSGAI_w(state.tension);
+    const w = MSGAI_w(state.tension);
     document.getElementById('t_val').textContent = state.tension.toFixed(6);
-    document.getElementById('w_val').textContent = currentW.toFixed(2);
-    document.getElementById('bal_list').innerHTML = curs.map(c=>`<div class="metric"><div>${c}</div><div class="metric-value">${(state.accounts[state.user][c]||0).toFixed(4)}</div></div>`).join('');
+    document.getElementById('w_val').textContent = w.toFixed(2);
+    document.getElementById('bal_list').innerHTML = curs.map(c=>`<div class="metric"><div>${c}</div><div class="metric-value">${(state.accounts.User_A[c]||0).toFixed(4)}</div></div>`).join('');
     
-    // 履歴更新
-    ['acc','mint','tx','ai'].forEach(t=>{
-        const s=document.getElementById(t+'_hist_short');
-        if(s) s.innerHTML = [...state.hist[t]].reverse().slice(0,5).map(h=>`<tr><td>${h.time}</td><td>${h.desc}</td><td style="text-align:right;">φ:${h.amt}</td></tr>`).join('');
+    // 短縮履歴の更新
+    ['mint','tx','ai'].forEach(t=>{
+        const el = document.getElementById(t+'_hist_short');
+        if(el) el.innerHTML = state.hist[t].slice(-5).reverse().map(h=>`<tr><td>${h.time}</td><td>${h.desc}</td><td style="text-align:right;">φ:${h.amt}</td></tr>`).join('');
     });
 
-    monitorLogos(state.tension, currentW);
-    localStorage.setItem('msgai_sovereign_v36', JSON.stringify(state));
-}
-
-function monitorLogos(z, w) {
-    const chaosVal = (z * 100).toFixed(2);
-    const purityVal = Math.min((w / (phi*20)) * 100, 100).toFixed(2);
-    document.getElementById('chaos_val').textContent = chaosVal + "%";
-    document.getElementById('purity_val').textContent = purityVal + "%";
+    // モニター更新
+    document.getElementById('chaos_val').textContent = (state.tension * 100).toFixed(2) + "%";
+    document.getElementById('purity_val').textContent = Math.min((w/(phi*10))*100, 100).toFixed(2) + "%";
     
-    const pulse = document.getElementById('alert-pulse');
-    const warning = document.getElementById('logos-warning');
-    const log = document.getElementById('logos-live-log');
-    
-    if (w < 5.0) { // 閾値以下の調和
-        pulse.style.background = "#ff4b4b"; pulse.style.boxShadow = "0 0 15px #ff4b4b";
-        warning.style.display = "block";
-        log.innerHTML += `<div style="color:#ff4b4b;">[${new Date().toLocaleTimeString()}] ALERT: Chaos Overflow. w=${w.toFixed(4)}</div>`;
-    } else {
-        pulse.style.background = "#00ff41"; pulse.style.boxShadow = "0 0 15px #00ff41";
-        warning.style.display = "none";
-        if(Math.random() > 0.8) log.innerHTML += `<div style="color:#00ff41;">[${new Date().toLocaleTimeString()}] STABLE: Logos Sync Active.</div>`;
-    }
-    log.scrollTop = log.scrollHeight;
+    localStorage.setItem('msgai_v36_final', JSON.stringify(state));
 }
 
 function runMint(){
     const c=document.getElementById('m_cur').value, a=parseFloat(document.getElementById('m_amt').value);
-    const z = MSGAI_z(c+a);
-    const w = MSGAI_w(z);
-    state.accounts[state.user][c] = (state.accounts[state.user][c]||0) + w;
-    state.tension += (z/10);
+    const z=MSGAI_z(c+a), w=MSGAI_w(z);
+    state.accounts.User_A[c] += w; state.tension += (z/10);
     state.hist.mint.push({time:new Date().toLocaleTimeString(), desc:`生成:${c}`, amt:w.toFixed(4)});
     update();
 }
 
 function runTx(){
     const c=document.getElementById('tx_cur').value, a=parseFloat(document.getElementById('amt_in').value), r=document.getElementById('rx_in').value;
-    const z = MSGAI_z(c+a);
-    const w = MSGAI_w(z);
-    if(state.accounts[state.user][c] >= w){
-        state.accounts[state.user][c] -= w;
-        if(!state.accounts[r]) state.accounts[r]={};
-        state.accounts[r][c] = (state.accounts[r][c]||0) + w;
-        state.tension += (z/5);
+    const z=MSGAI_z(c+a), w=MSGAI_w(z);
+    if(state.accounts.User_A[c]>=w){
+        state.accounts.User_A[c]-=w; state.tension+=(z/5);
         state.hist.tx.push({time:new Date().toLocaleTimeString(), desc:`送金:${r}`, amt:w.toFixed(4)});
         update();
-    } else { alert("調和不足（残高不足）: w変換値が足りません"); }
+    } else { alert("調和不足"); }
 }
 
 async function talk(){
     const msg=document.getElementById('ai-in').value; if(!msg) return;
-    const log=document.getElementById('ai-log');
-    log.innerHTML += `<div style="color:#fff;">> User: ${msg}</div>`;
+    const z=MSGAI_z(msg), w=MSGAI_w(z);
+    document.getElementById('ai-log').innerHTML += `<div>> ${msg} <span style="color:var(--accent); font-size:0.8em;">(w:${w.toFixed(4)})</span></div>`;
     document.getElementById('ai-in').value='';
-    
-    const z = MSGAI_z(msg);
-    const w = MSGAI_w(z);
-    
-    setTimeout(()=>{
-        log.innerHTML += `<div style="color:var(--accent);">[Logos-Output] 調和係数w: ${w.toFixed(6)} を検知。変換完了。</div>`;
-        log.scrollTop = log.scrollHeight;
-    }, 618);
+    state.hist.ai.push({time:new Date().toLocaleTimeString(), desc:msg.substring(0,15), amt:w.toFixed(4)});
+    state.tension += z; update();
+}
 
-    state.hist.ai.push({time:new Date().toLocaleTimeString(), desc:msg.substring(0,10), amt:w.toFixed(4)});
-    state.tension += z;
-    update();
+function showFullHist(type){
+    const titles = {mint:'全生成履歴', tx:'全移動履歴', ai:'全対話ログ分析'};
+    document.getElementById('modal-title').textContent = titles[type];
+    document.getElementById('modal-table').innerHTML = [...state.hist[type]].reverse().map(h=>`<tr><td>${h.time}</td><td>${h.desc}</td><td style="text-align:right;">φ:${h.amt}</td></tr>`).join('');
+    document.getElementById('modal-overlay').style.display = 'flex';
+}
+
+function closeModal(){ document.getElementById('modal-overlay').style.display = 'none'; }
+function openTab(n){
+    document.querySelectorAll('.tab-pane,.tab-btn').forEach(el=>el.classList.remove('active'));
+    document.getElementById(n).classList.add('active');
+    document.getElementById('btn-'+n).classList.add('active');
 }
 
 document.addEventListener('DOMContentLoaded', ()=>{
@@ -214,7 +195,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
         document.getElementById('m_cur').add(new Option(c,c));
         document.getElementById('tx_cur').add(new Option(c,c));
     });
-    update(); animateCards();
+    update();
 });
 </script>
 </body>
