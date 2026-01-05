@@ -1,128 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MSGAI - Sovereign V37.1</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MSGAI - Sovereign V37.2</title>
 <style>
-:root { --ratio: 1.618; --accent: #007bff; --bg: #0b1014; --surface: #1a1f24; --text: #e9ecef; }
-body { font-family: 'Inter', system-ui, sans-serif; margin: 0; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-header { background: #000; color: #fff; padding: 12px 20px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent); }
-.brand { font-weight: 800; letter-spacing: 0.1em; font-size: 0.85rem; color: var(--accent); }
-.lang-selector { background: #222; color: #fff; border: 1px solid #444; font-size: 0.7rem; padding: 4px; border-radius: 4px; }
-nav { display: flex; background: #111; border-bottom: 1px solid #333; }
-.tab { flex: 1; padding: 12px; border: none; background: none; color: #666; font-weight: bold; cursor: pointer; font-size: 0.7rem; text-transform: uppercase; border-bottom: 3px solid transparent; }
-.tab.active { color: var(--accent); border-bottom-color: var(--accent); background: #1a1a1a; }
+:root { --ratio: 1.618; --accent: #007bff; --bg: #0b0e11; --surface: #15191d; --text: #e9ecef; }
+body { font-family: 'Inter', sans-serif; margin: 0; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+header { background: #000; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent); }
+.brand { font-weight: 800; color: var(--accent); font-size: 0.85rem; letter-spacing: 0.1em; }
+nav { display: flex; background: #000; border-bottom: 1px solid #333; flex-shrink: 0; }
+.tab { flex: 1; padding: 12px; border: none; background: none; color: #666; font-weight: bold; cursor: pointer; font-size: 0.7rem; border-bottom: 2px solid transparent; }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); background: #0a0a0a; }
 #viewport { flex-grow: 1; overflow-y: auto; padding: 15px; }
 .pane { display: none; width: 100%; max-width: 900px; margin: 0 auto; }
 .pane.active { display: block; }
 .card { background: var(--surface); border-radius: 10px; border: 1px solid #2d333b; padding: 18px; margin-bottom: 15px; }
-.card-title { font-size: 0.65rem; font-weight: 700; color: #768390; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.1em; border-left: 3px solid var(--accent); padding-left: 10px; }
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; }
-.data-node { background: #24292e; border: 1px solid #2d333b; padding: 12px; border-radius: 8px; text-align: center; }
+.card-title { font-size: 0.65rem; font-weight: 700; color: #768390; margin-bottom: 15px; text-transform: uppercase; border-left: 3px solid var(--accent); padding-left: 10px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+.data-node { background: #1c2128; border: 1px solid #2d333b; padding: 12px; border-radius: 8px; text-align: center; }
 .label { font-size: 0.6rem; color: #768390; margin-bottom: 4px; }
 .value { font-family: monospace; font-weight: bold; font-size: 1rem; color: #adbac7; }
-.scan-area { background: #000; border: 1px solid #333; height: 100px; border-radius: 6px; overflow-y: auto; padding: 10px; font-family: monospace; font-size: 0.7rem; color: #00ff41; margin-bottom: 10px; }
 input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #444; border-radius: 6px; background: #0d1117; color: #fff; }
-.btn { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.75rem; text-transform: uppercase; }
+.btn { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.75rem; transition: 0.2s; }
 .btn-primary { background: var(--accent); color: #fff; }
 .btn-danger { background: #d73a49; color: #fff; }
 .btn-secondary { background: #444; color: #fff; }
-#console { background: #0d1117; color: #adbac7; padding: 15px; font-family: monospace; font-size: 0.75rem; height: 200px; overflow-y: auto; border-radius: 8px; border: 1px solid #2d333b; }
+#console { background: #0d1117; color: #adbac7; padding: 15px; font-family: monospace; font-size: 0.75rem; height: 180px; overflow-y: auto; border-radius: 8px; border: 1px solid #2d333b; }
+.scan-area { background: #000; border: 1px solid #333; height: 80px; border-radius: 6px; overflow-y: auto; padding: 10px; font-family: monospace; font-size: 0.7rem; color: #00ff41; margin-bottom: 10px; }
 </style>
 </head>
 <body>
-
 <header>
-    <div class="brand">MSGAI V37.1 - INTEGRITY RESTORED</div>
-    <select class="lang-selector" id="lang-policy" onchange="changeLang()">
-        <option value="en">English (System)</option>
-        <option value="jp">日本語 (Logos)</option>
-        <option value="zh">简体中文 (Structure)</option>
-        <option value="ko">한국어 (Causality)</option>
-        <option value="fr">Français (Valeur)</option>
-        <option value="de">Deutsch (Ordnung)</option>
+    <div class="brand">MSGAI SOVEREIGN V37.2</div>
+    <select id="lang-policy" onchange="changeLang()" style="width:auto; margin:0;">
+        <option value="en">English (System)</option><option value="jp">日本語 (Logos)</option>
+        <option value="zh">简体中文 (Structure)</option><option value="ko">한국어 (Causality)</option>
+        <option value="fr">Français</option><option value="de">Deutsch</option>
     </select>
 </header>
-
 <nav>
     <button class="tab active" id="tab-flux" onclick="showPane('flux')">FLUX</button>
     <button class="tab" id="tab-discovery" onclick="showPane('discovery')">DISCOVERY</button>
     <button class="tab" id="tab-core" onclick="showPane('core')">CORE</button>
     <button class="tab" id="tab-monitor" onclick="showPane('monitor')">MONITOR</button>
 </nav>
-
 <main id="viewport">
     <section id="flux" class="pane active">
         <div class="card"><div class="card-title" data-key="title_ledger">State Overview</div><div id="ledger-grid" class="grid"></div></div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
             <div class="card"><div class="card-title" data-key="title_synth">Data Calibration</div><select id="syn-asset"></select><input type="number" id="syn-amount" value="100"><button class="btn btn-danger" data-key="btn_syn" onclick="doSynth()">PROCESS</button></div>
             <div class="card"><div class="card-title" data-key="title_adj">Flux Recalibration</div><input type="text" id="adj-target" placeholder="Target Node..."><input type="number" id="adj-flux" value="50"><button class="btn btn-primary" data-key="btn_adj" onclick="doRecalibrate()">APPLY FLUX</button></div>
         </div>
     </section>
-
     <section id="discovery" class="pane">
-        <div class="card">
-            <div class="card-title" data-key="title_search">External Node Discovery</div>
-            <button class="btn btn-primary" data-key="btn_scan" onclick="startScan()">START SCANNING</button>
-            <div class="scan-area" id="scan-log">Idle...</div>
-            <div id="discovered-nodes"></div>
-        </div>
+        <div class="card"><div class="card-title" data-key="title_search">Node Discovery</div><button class="btn btn-primary" data-key="btn_scan" onclick="startScan()">START SCANNING</button><div class="scan-area" id="scan-log">Idle...</div><div id="discovered-nodes"></div></div>
     </section>
-
     <section id="core" class="pane">
-        <div class="card">
-            <div class="card-title" data-key="title_protocol">Inference Core</div>
-            <select id="proto-select"><option value="p-g">PROTOCOL G</option><option value="p-c">PROTOCOL C</option><option value="p-o">PROTOCOL O</option></select>
-            <div id="console"></div>
-            <input type="text" id="engine-in" placeholder="..." onkeydown="if(event.key==='Enter') doInference()" style="margin-top:10px;">
-        </div>
+        <div class="card"><div class="card-title" data-key="title_protocol">Inference Core</div><select id="proto-select"><option value="p-g">PROTOCOL G</option><option value="p-c">PROTOCOL C</option><option value="p-o">PROTOCOL O</option></select><div id="console"></div><input type="text" id="engine-in" placeholder="..." onkeydown="if(event.key==='Enter') doInference()" style="margin-top:10px;"></div>
     </section>
-
     <section id="monitor" class="pane">
-        <div class="card">
-            <div class="card-title" data-key="title_monitor">System Monitor</div>
-            <div class="grid">
-                <div class="data-node"><div class="label" data-key="label_z">Tension (z)</div><div class="value" id="z-val">0</div></div>
-                <div class="data-node"><div class="label" data-key="label_w">Harmonic Ratio (w)</div><div class="value" id="w-val">0</div></div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-title" data-key="title_purge">Normalization</div>
-            <button class="btn btn-secondary" data-key="btn_reset_ledger" onclick="resetPart()">Reset Logic</button>
-            <button class="btn btn-danger" style="margin-top:10px;" data-key="btn_reset_all" onclick="fullReset()">Full Reset</button>
-        </div>
+        <div class="card"><div class="card-title" data-key="title_monitor">System Monitor</div><div class="grid"><div class="data-node"><div class="label" data-key="label_z">Tension (z)</div><div class="value" id="z-val">0</div></div><div class="data-node"><div class="label" data-key="label_w">Harmonic Ratio (w)</div><div class="value" id="w-val">0</div></div></div></div>
+        <div class="card"><div class="card-title" data-key="title_purge">Normalization</div><button class="btn btn-secondary" data-key="btn_reset_ledger" onclick="resetPart()">Reset Logic</button><button class="btn btn-danger" style="margin-top:10px;" data-key="btn_reset_all" onclick="fullReset()">Full Reset</button></div>
     </section>
 </main>
-
 <script>
-const ASSETS = ["USD","JPY","EUR","BTC","ETH","MATIC"];
-const PHI = 1.618;
-const DICTIONARY = {
-    en: { title_ledger: "State Overview", title_synth: "Data Calibration", btn_syn: "PROCESS DATA", title_adj: "Flux Recalibration", btn_adj: "APPLY FLUX", title_search: "External Node Discovery", btn_scan: "START SCANNING", title_protocol: "Inference Core", title_monitor: "System Monitor", label_z: "Tension (z)", label_w: "Harmon Ratio (w)", title_purge: "Normalization", btn_reset_ledger: "Reset Logic", btn_reset_all: "Full Reset" },
-    jp: { title_ledger: "均衡状態 / 台帳", title_synth: "事象生成 / 統合", btn_syn: "現出", title_adj: "因果の移動 / 均衡の転送", btn_adj: "転送実行", title_search: "外部因果の索敵", btn_scan: "スキャン開始", title_protocol: "理（ロゴス）の核", title_monitor: "理の観測", label_z: "緊張度 (z)", label_w: "調和比 (w)", title_purge: "原点回帰 / 浄化", btn_reset_ledger: "台帳初期化", btn_reset_all: "全系浄化" },
-    fr: { title_ledger: "État du Grand Livre", title_synth: "Synthèse de Valeur", btn_syn: "EXÉCUTER", title_adj: "Recalibrage de Flux", btn_adj: "APPLIQUER", title_search: "Découverte de Noeuds", btn_scan: "SCANNER", title_protocol: "Noyau d'Inférence", title_monitor: "Moniteur Système", label_z: "Tension (z)", label_w: "Rapport Harmonique", title_purge: "Normalisation", btn_reset_ledger: "Réinitialiser", btn_reset_all: "Réinitialisation Totale" }
-    /* zh, ko, de similarly restored... */
+const ASSETS=["USD","JPY","EUR","BTC","ETH","MATIC"]; const PHI=1.618;
+const DICTIONARY={
+    en:{title_ledger:"State Overview",title_synth:"Data Calibration",btn_syn:"PROCESS DATA",title_adj:"Flux Recalibration",btn_adj:"APPLY FLUX",title_search:"Node Discovery",btn_scan:"START SCANNING",title_protocol:"Inference Core",title_monitor:"System Monitor",label_z:"Tension (z)",label_w:"Ratio (w)",title_purge:"Normalization",btn_reset_ledger:"Reset Logic",btn_reset_all:"Full Reset"},
+    jp:{title_ledger:"均衡状態 / 台帳",title_synth:"事象生成 / 統合",btn_syn:"現出",title_adj:"因果の移動 / 均衡の転送",btn_adj:"転送実行",title_search:"外部因果の索敵",btn_scan:"スキャン開始",title_protocol:"理（ロゴス）の核",title_monitor:"理の観測",label_z:"緊張度 (z)",label_w:"調和比 (w)",title_purge:"原点回帰 / 浄化",btn_reset_ledger:"台帳初期化",btn_reset_all:"全系浄化"}
 };
-
-let state = JSON.parse(localStorage.getItem('msgai_v37_1')) || { z: 0.05, accounts: { User_A: Object.fromEntries(ASSETS.map(a => [a, 0])) }, lang: 'en' };
-
-function updateUI() {
-    const lang = state.lang || 'en';
-    document.querySelectorAll('[data-key]').forEach(el => { const k = el.getAttribute('data-key'); if(DICTIONARY[lang][k]) el.textContent = DICTIONARY[lang][k]; });
+let state = JSON.parse(localStorage.getItem('msgai_v37_2')) || { z: 0.05, accounts: { User_A: Object.fromEntries(ASSETS.map(a => [a, 0])) }, lang: 'en' };
+function updateUI(){
+    const lang = state.lang || 'en'; const d = DICTIONARY[lang] || DICTIONARY.en;
+    document.querySelectorAll('[data-key]').forEach(el => { const k=el.getAttribute('data-key'); if(d[k]) el.textContent=d[k]; });
     document.getElementById('z-val').textContent = state.z.toFixed(6);
     document.getElementById('w-val').textContent = (PHI/(state.z||0.001)).toFixed(2);
-    document.getElementById('ledger-grid').innerHTML = ASSETS.map(a => `<div class="data-node"><div class="label">${a}</div><div class="value">${(state.accounts.User_A[a] || 0).toFixed(4)}</div></div>`).join('');
-    localStorage.setItem('msgai_v37_1', JSON.stringify(state));
+    document.getElementById('ledger-grid').innerHTML = ASSETS.map(a => `<div class="data-node"><div class="label">${a}</div><div class="value">${(state.accounts.User_A[a]||0).toFixed(4)}</div></div>`).join('');
+    localStorage.setItem('msgai_v37_2', JSON.stringify(state));
 }
-
-function showPane(id) { document.querySelectorAll('.pane, .tab').forEach(el => el.classList.remove('active')); document.getElementById(id).classList.add('active'); document.getElementById('tab-' + id).classList.add('active'); }
-function changeLang() { state.lang = document.getElementById('lang-policy').value; updateUI(); }
-function doSynth() { const a = document.getElementById('syn-asset').value; const amt = parseFloat(document.getElementById('syn-amount').value); state.accounts.User_A[a] += (amt/100)*PHI; state.z += (amt/5000); updateUI(); }
-function doRecalibrate() { alert("Recalibration Applied."); }
-function startScan() { const log = document.getElementById('scan-log'); log.innerHTML = "Accessing External Streams...<br>Scanning Node 0x1F...<br>Complete."; }
-function fullReset() { if(confirm("Reset All?")) { localStorage.clear(); location.reload(); } }
-
+function showPane(id){ document.querySelectorAll('.pane, .tab').forEach(el=>el.classList.remove('active')); document.getElementById(id).classList.add('active'); document.getElementById('tab-'+id).classList.add('active'); }
+function changeLang(){ state.lang = document.getElementById('lang-policy').value; updateUI(); }
+function doSynth(){ const a=document.getElementById('syn-asset').value; const amt=parseFloat(document.getElementById('syn-amount').value); state.accounts.User_A[a]+=(amt/100)*PHI; state.z+=(amt/5000); updateUI(); }
+function doRecalibrate(){ alert("Flux Recalibration Applied."); }
+function startScan(){ const log=document.getElementById('scan-log'); log.innerHTML="Scanning External Node 0x1F...<br>Boundary Identified."; }
+function doInference(){ const input=document.getElementById('engine-in').value; if(!input)return; document.getElementById('console').innerHTML+=`<div>> ${input}</div>`; document.getElementById('engine-in').value=''; }
+function resetPart(){ state.accounts.User_A=Object.fromEntries(ASSETS.map(a=>[a,0])); state.z=0.05; updateUI(); }
+function fullReset(){ if(confirm("Full Reset?")){ localStorage.clear(); location.reload(); } }
 document.addEventListener('DOMContentLoaded', () => { ASSETS.forEach(a => document.getElementById('syn-asset').add(new Option(a, a))); updateUI(); });
 </script>
 </body>
