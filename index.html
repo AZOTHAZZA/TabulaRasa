@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -57,21 +57,16 @@ input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px sol
 </nav>
 <main id="viewport">
     <section id="canvas" class="pane active">
-        <div class="card">
-            <div class="card-title" data-key="title_canvas"></div>
-            <div class="grid" id="scenery-display"></div>
-        </div>
+        <div class="card"><div class="card-title" data-key="title_canvas"></div><div class="grid" id="scenery-display"></div></div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
             <div class="card">
                 <div class="card-title" data-key="title_colors"></div>
-                <select id="color-choice"></select>
-                <input type="number" id="brush-intensity" value="100">
+                <select id="color-choice"></select><input type="number" id="brush-intensity" value="100">
                 <button class="btn btn-neutral" data-key="btn_paint" onclick="paintOnCanvas()"></button>
             </div>
             <div class="card">
                 <div class="card-title" data-key="title_painting"></div>
-                <input type="text" id="subject-node" placeholder="">
-                <button class="btn btn-neutral" data-key="btn_draw" onclick="drawLayer()"></button>
+                <input type="text" id="subject-node" placeholder=""><button class="btn btn-neutral" data-key="btn_draw" onclick="drawLayer()"></button>
             </div>
         </div>
     </section>
@@ -101,6 +96,20 @@ input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px sol
             </div>
         </div>
         <div class="card">
+            <div class="card-title" data-key="title_governance"></div>
+            <div class="grid" style="grid-template-columns: 1fr 1fr; align-items: end;">
+                <div>
+                    <div class="label" data-key="label_target"></div>
+                    <select id="gov-target"></select>
+                </div>
+                <div>
+                    <div class="label" data-key="label_mode"></div>
+                    <select id="gov-mode"></select>
+                </div>
+            </div>
+            <button class="btn btn-neutral" data-key="btn_apply_gov" onclick="applyGovernance()"></button>
+        </div>
+        <div class="card">
             <div class="card-title" data-key="title_clean"></div>
             <select id="clean-target"></select>
             <button class="btn btn-danger" data-key="btn_clean" onclick="executeClean()"></button>
@@ -120,27 +129,32 @@ const TONES = {
 const DICTIONARY = {
     en: { 
         super_title: "TABULA RASA", tab_canvas: "CANVAS", tab_window: "DOOR", tab_table: "TABLE", tab_book: "RECORD", tab_status: "STATUS",
-        title_canvas: "CANVAS", title_colors: "COLORS", title_clean: "CLEANING", title_painting: "SIGNING", title_window: "DOORWAY", title_table: "TABLE", title_book: "RECORD", title_status: "STATUS",
-        btn_paint: "PAINT", btn_draw: "SIGN", btn_scan: "OPEN DOOR", btn_clean: "CLEAN UP", 
-        label_z: "z-colors", label_w: "w-colors", placeholder: "Sign details...",
+        title_canvas: "CANVAS", title_colors: "COLORS", title_clean: "CLEANING", title_painting: "SIGNING", title_window: "DOORWAY", title_table: "TABLE", title_book: "RECORD", title_status: "STATUS", title_governance: "GOVERNANCE",
+        btn_paint: "PAINT", btn_draw: "SIGN", btn_scan: "OPEN DOOR", btn_clean: "CLEAN UP", btn_apply_gov: "SET MODE",
+        label_z: "z-colors", label_w: "w-colors", label_target: "Target", label_mode: "Mode", placeholder: "Sign details...",
         door_closed: "Status: CLOSED", door_opening: "Status: OPENING...", door_sync: "Status: OPENED (Sync: ",
         brands: { neutral: "NEUTRAL STUDIO", logical: "LOGICAL STUDIO", universal: "UNIVERSAL STUDIO" },
         tones: { neutral: "Neutral Tone", logical: "Logical Tone", universal: "Universal Tone" },
-        targets: { canvas:"Canvas", color:"Colors", sign:"Sign", door:"Door", table:"Table", record:"Record", status:"Status", studio:"Studio" }
+        targets: { canvas:"Canvas", cleaning:"Cleaning", sign:"Sign", door:"Door", table:"Table", record:"Record", status:"Status", studio:"Studio" },
+        modes: { manual: "Manual (I do)", automatic: "Automatic (System do)", autonomous: "Autonomous (Entrust)" }
     },
     jp: { 
         super_title: "タブラ・ラサ", tab_canvas: "キャンバス", tab_window: "ドア", tab_table: "作業台", tab_book: "記録", tab_status: "状態",
-        title_canvas: "キャンバス", title_colors: "絵の具", title_clean: "掃除", title_painting: "サイン", title_window: "ドア", title_table: "作業台", title_book: "記録", title_status: "状態",
-        btn_paint: "色を乗せる", btn_draw: "サインする", btn_scan: "ドアを開ける", btn_clean: "綺麗にする", 
-        label_z: "zの色", label_w: "wの色", placeholder: "サインの内容...",
+        title_canvas: "キャンバス", title_colors: "絵の具", title_clean: "掃除", title_painting: "サイン", title_window: "ドア", title_table: "作業台", title_book: "記録", title_status: "状態", title_governance: "統治",
+        btn_paint: "色を乗せる", btn_draw: "サインする", btn_scan: "ドアを開ける", btn_clean: "綺麗にする", btn_apply_gov: "設定する",
+        label_z: "zの色", label_w: "wの色", label_target: "対象", label_mode: "様式", placeholder: "サインの内容...",
         door_closed: "状態: 閉鎖中", door_opening: "状態: 開放プロセス中...", door_sync: "状態: 開放中 (最終同期: ",
         brands: { neutral: "ニュートラル・スタジオ", logical: "ロジカル・スタジオ", universal: "ユニバーサル・スタジオ" },
         tones: { neutral: "ニュートラル・トーン", logical: "ロジカル・トーン", universal: "ユニバーサル・トーン" },
-        targets: { canvas:"キャンバス", color:"絵の具", sign:"サイン", door:"ドア", table:"作業台", record:"記録", status:"状態", studio:"スタジオ" }
+        targets: { canvas:"キャンバス", cleaning:"掃除", sign:"サイン", door:"ドア", table:"作業台", record:"記録", status:"状態", studio:"スタジオ" },
+        modes: { manual: "手動 (自分でやる)", automatic: "自動 (やってもらう)", autonomous: "自律 (まかせる)" }
     }
 };
 
-let studio = JSON.parse(localStorage.getItem('tabula_rasa_v68')) || { tension: 0.05, scenery: Object.fromEntries(COLOR_SYSTEM.map(c => [c, 0])), tone: 'neutral', lang: 'en', chronicles: [] };
+let studio = JSON.parse(localStorage.getItem('tabula_rasa_v69')) || { 
+    tension: 0.05, scenery: Object.fromEntries(COLOR_SYSTEM.map(c => [c, 0])), tone: 'neutral', lang: 'en', chronicles: [],
+    gov: { cleaning: 'manual', door: 'manual', studio: 'manual' }
+};
 
 function applyTheme(isManual = false) {
     const theme = TONES[studio.tone];
@@ -160,6 +174,8 @@ function updateLabels() {
     
     updateSelect('ui-tone', d.tones, studio.tone);
     updateSelect('clean-target', d.targets, "studio");
+    updateSelect('gov-target', d.targets, "cleaning");
+    updateSelect('gov-mode', d.modes, "manual");
 
     const status = document.getElementById('door-status');
     if(!status.textContent || status.textContent.includes("状態") || status.textContent.includes("Status")) status.textContent = d.door_closed;
@@ -185,7 +201,7 @@ function updateUI() {
     document.getElementById('chronicle-box').innerHTML = studio.chronicles.map(c => `<p><i>[${c.t}]</i> ${c.m}</p>`).reverse().join('');
 }
 
-function save() { localStorage.setItem('tabula_rasa_v68', JSON.stringify(studio)); }
+function save() { localStorage.setItem('tabula_rasa_v69', JSON.stringify(studio)); }
 
 function paintOnCanvas(){
     const c=document.getElementById('color-choice').value;
@@ -194,16 +210,13 @@ function paintOnCanvas(){
     writeChronicle((studio.lang==='jp'?`${c}に${v}を乗せました`:`Applied ${v} of ${c}`));
 }
 
-function writeChronicle(msg){
-    studio.chronicles.push({t: new Date().toLocaleTimeString(), m: msg});
-    if(studio.chronicles.length>100) studio.chronicles.shift();
-    updateUI();
-}
-
-function showPane(id){
-    document.querySelectorAll('.pane, .tab').forEach(el=>el.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    document.getElementById('tab-'+id).classList.add('active');
+function applyGovernance() {
+    const target = document.getElementById('gov-target').value;
+    const mode = document.getElementById('gov-mode').value;
+    studio.gov[target] = mode;
+    const d = DICTIONARY[studio.lang];
+    writeChronicle(d.targets[target] + (studio.lang==='jp'?'を':' to ') + d.modes[mode] + (studio.lang==='jp'?'に設定しました':' set.'));
+    save();
 }
 
 function executeClean() {
@@ -252,3 +265,4 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
