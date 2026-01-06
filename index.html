@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MSGAI - Sovereign V45.0</title>
+<title>MSGAI - Sovereign Palette V49.0</title>
 <style>
 :root { --ratio: 1.618; --accent: #007bff; --bg: #0b0e11; --surface: #15191d; --text: #e9ecef; }
 body { font-family: 'Inter', sans-serif; margin: 0; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
@@ -23,8 +23,7 @@ nav { display: flex; background: #000; border-bottom: 1px solid #333; flex-shrin
 input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #444; border-radius: 6px; background: #0d1117; color: #fff; font-size: 0.8rem; }
 .btn { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.75rem; transition: 0.2s; }
 .btn-danger { background: #d73a49; color: #fff; }
-#console { background: #000; color: #adbac7; padding: 12px; font-family: monospace; font-size: 0.7rem; height: 150px; overflow-y: auto; border-radius: 6px; border: 1px solid #333; }
-#book-content { background: #0a0a0a; color: #c9d1d9; padding: 15px; font-family: 'Georgia', serif; font-size: 0.85rem; height: 300px; overflow-y: auto; border-radius: 6px; border: 1px solid #30363d; line-height: 1.6; }
+#chronicle-box { background: #0a0a0a; color: #c9d1d9; padding: 15px; font-family: 'Georgia', serif; font-size: 0.85rem; height: 300px; overflow-y: auto; border-radius: 6px; border: 1px solid #30363d; line-height: 1.6; }
 .mode-selector { display: flex; gap: 5px; margin-bottom: 10px; }
 .mode-btn { flex: 1; padding: 8px; font-size: 0.6rem; background: #222; border: 1px solid #444; color: #666; cursor: pointer; border-radius: 4px; }
 .mode-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
@@ -32,10 +31,13 @@ input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px sol
 </head>
 <body>
 <header>
-    <div class="brand">MSGAI CANVAS V45.0</div>
-    <select id="lang-policy" onchange="applyLang()" style="width:auto; margin:0; font-size:0.7rem;">
-        <option value="en">English</option><option value="jp">日本語</option>
-    </select>
+    <div class="brand">MSGAI ART-STUDIO V49.0</div>
+    <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 0.6rem; color: #666; font-weight: bold; text-transform: uppercase;">Palette:</span>
+        <select id="studio-palette" onchange="switchPalette()" style="width:auto; margin:0; font-size:0.7rem;">
+            <option value="en">Default Tone</option><option value="jp">理の色調</option>
+        </select>
+    </div>
 </header>
 <nav>
     <button class="tab active" id="tab-canvas" onclick="showPane('canvas')">CANVAS</button>
@@ -46,73 +48,92 @@ input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px sol
 </nav>
 <main id="viewport">
     <section id="canvas" class="pane active">
-        <div class="card"><div class="card-title" data-key="title_canvas">CANVAS</div><div id="canvas-grid" class="grid"></div></div>
+        <div class="card"><div class="card-title" data-key="title_canvas">CANVAS</div><div id="scenery-display" class="grid"></div></div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
             <div class="card">
                 <div class="card-title" data-key="title_colors">COLORS</div>
                 <div class="mode-selector">
-                    <button class="mode-btn active" id="m-manual" onclick="setMode('manual')">DIRECT</button>
-                    <button class="mode-btn" id="m-auto" onclick="setMode('auto')">RESONANT</button>
-                    <button class="mode-btn" id="m-self" onclick="setMode('self')">EVO</button>
+                    <button class="mode-btn active" id="m-manual" onclick="setTechnique('manual')">DIRECT</button>
+                    <button class="mode-btn" id="m-auto" onclick="setTechnique('auto')">RESONANT</button>
+                    <button class="mode-btn" id="m-self" onclick="setTechnique('self')">EVO</button>
                 </div>
-                <select id="color-select"></select><input type="number" id="color-intensity" value="100">
-                <button class="btn btn-danger" data-key="btn_paint" onclick="paintOnCanvas()">PAINT</button>
+                <select id="color-choice"></select><input type="number" id="brush-intensity" value="100">
+                <button class="btn btn-danger" data-key="btn_paint" onclick="paintStroke()">PAINT</button>
             </div>
             <div class="card">
                 <div class="card-title" data-key="title_painting">PAINTING</div>
-                <input type="text" id="p-subject" placeholder="Subject..."><input type="number" id="p-stroke" value="50">
-                <button class="btn btn-primary" data-key="btn_draw" onclick="drawStroke()">DRAW</button>
+                <input type="text" id="subject-ref" placeholder="Subject..."><input type="number" id="stroke-depth" value="50">
+                <button class="btn btn-primary" data-key="btn_draw" onclick="drawLayer()">DRAW</button>
             </div>
         </div>
     </section>
+
     <section id="window" class="pane">
-        <div class="card"><div class="card-title" data-key="title_window">WINDOW</div><button class="btn btn-primary" data-key="btn_scan" onclick="peekWindow()">SCAN</button><div id="window-nodes" style="margin-top:10px;"></div></div>
+        <div class="card"><div class="card-title" data-key="title_window">WINDOW</div><button class="btn btn-primary" data-key="btn_scan" onclick="viewWindow()">SCAN</button><div id="window-signals" style="margin-top:10px;"></div></div>
     </section>
+
     <section id="table" class="pane">
-        <div class="card"><div class="card-title" data-key="title_table">TABLE</div><div id="console"></div><input type="text" id="t-in" placeholder="..." onkeydown="if(event.key==='Enter') useTable()" style="margin-top:10px;"></div>
+        <div class="card"><div class="card-title" data-key="title_table">TABLE</div><div id="console"></div><input type="text" id="concept-in" placeholder="..." onkeydown="if(event.key==='Enter') applyTable()" style="margin-top:10px;"></div>
     </section>
+
     <section id="book" class="pane">
-        <div class="card"><div class="card-title" data-key="title_book">BOOK</div><div id="book-content"></div></div>
+        <div class="card"><div class="card-title" data-key="title_book">BOOK</div><div id="chronicle-box"></div></div>
     </section>
+
     <section id="screen" class="pane">
         <div class="card">
             <div class="card-title" data-key="title_screen">SCREEN</div>
             <div class="grid">
-                <div class="data-node"><div class="label" data-key="label_z">z-value</div><div class="value" id="z-val">0</div></div>
-                <div class="data-node"><div class="label" data-key="label_w">w-value</div><div class="value" id="w-val">0</div></div>
+                <div class="data-node"><div class="label" data-key="label_z">z-colors</div><div class="value" id="z-val">0</div></div>
+                <div class="data-node"><div class="label" data-key="label_w">w-colors</div><div class="value" id="w-val">0</div></div>
             </div>
         </div>
         <div class="card"><button class="btn btn-danger" data-key="btn_erase" onclick="eraseCanvas()">ERASE</button></div>
     </section>
 </main>
 <script>
-const PALETTE=["USD","JPY","EUR","BTC","ETH","MATIC"]; const PHI=1.618;
+const COLOR_SYSTEM=["USD","JPY","EUR","BTC","ETH","MATIC"]; const PHI=1.618;
 const DICTIONARY={
-    en:{title_canvas:"CANVAS",title_colors:"COLORS",title_painting:"PAINTING",title_window:"WINDOW",title_table:"TABLE",title_book:"BOOK",title_screen:"SCREEN",btn_paint:"PAINT",btn_draw:"DRAW",btn_scan:"SCAN",btn_erase:"ERASE CANVAS",label_z:"z-value",label_w:"w-value"},
-    jp:{title_canvas:"因果の布",title_colors:"色彩の源",title_painting:"描写の構成",title_window:"観測の窓",title_table:"理の台",title_book:"因果の書",title_screen:"理の幕",btn_paint:"筆を入れる",btn_draw:"線を引く",btn_scan:"窓から観測",btn_erase:"布を清める",label_z:"緊張度 (z)",label_w:"調和比 (w)"}
+    en:{title_canvas:"CANVAS",title_colors:"COLORS",title_painting:"PAINTING",title_window:"WINDOW",title_table:"TABLE",title_book:"BOOK",title_screen:"SCREEN",btn_paint:"PAINT",btn_draw:"DRAW",btn_scan:"SCAN",btn_erase:"ERASE CANVAS",label_z:"z-colors",label_w:"w-colors"},
+    jp:{title_canvas:"因果の布",title_colors:"色彩の源",title_painting:"描写の構成",title_window:"観測の窓",title_table:"理の台",title_book:"因果の書",title_screen:"理の幕",btn_paint:"筆を入れる",btn_draw:"線を引く",btn_scan:"窓から観測",btn_erase:"布を清める",label_z:"zの彩度",label_w:"wの調和"}
 };
-let studio = JSON.parse(localStorage.getItem('msgai_v45_studio')) || { tension: 0.05, scenery: Object.fromEntries(PALETTE.map(c => [c, 0])), lang: 'en', mode: 'manual', chronicles: [] };
+let studio = JSON.parse(localStorage.getItem('msgai_v49_studio')) || { tension: 0.05, scenery: Object.fromEntries(COLOR_SYSTEM.map(c => [c, 0])), lang: 'en', technique: 'manual', chronicles: [] };
 
-function updateStudio(){
+function updateStudioUI(){
     const d = DICTIONARY[studio.lang] || DICTIONARY.en;
     document.querySelectorAll('[data-key]').forEach(el => { const k=el.getAttribute('data-key'); if(d[k]) el.textContent=d[k]; });
     document.getElementById('z-val').textContent = studio.tension.toFixed(6);
     document.getElementById('w-val').textContent = (PHI/(studio.tension||0.001)).toFixed(2);
-    document.getElementById('canvas-grid').innerHTML = PALETTE.map(c => `<div class="data-node"><div class="label">${c}</div><div class="value">${(studio.scenery[c]||0).toFixed(4)}</div></div>`).join('');
-    document.getElementById('book-content').innerHTML = studio.chronicles.map(c => `<p><i>[${c.t}]</i> ${c.m}</p>`).reverse().join('');
-    localStorage.setItem('msgai_v45_studio', JSON.stringify(studio));
+    document.getElementById('scenery-display').innerHTML = COLOR_SYSTEM.map(c => `<div class="data-node"><div class="label">${c}</div><div class="value">${(studio.scenery[c]||0).toFixed(4)}</div></div>`).join('');
+    document.getElementById('chronicle-box').innerHTML = studio.chronicles.map(c => `<p><i>[${c.t}]</i> ${c.m}</p>`).reverse().join('');
+    localStorage.setItem('msgai_v49_studio', JSON.stringify(studio));
 }
-function writeBook(msg){ studio.chronicles.push({t: new Date().toLocaleTimeString(), m: msg}); if(studio.chronicles.length>100) studio.chronicles.shift(); updateStudio(); }
-function setMode(m){ studio.mode = m; document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active')); document.getElementById('m-'+m).classList.add('active'); writeBook(`Brush mode shifted: ${m.toUpperCase()}`); }
+
+function addChronicle(msg){ studio.chronicles.push({t: new Date().toLocaleTimeString(), m: msg}); if(studio.chronicles.length>100) studio.chronicles.shift(); updateStudioUI(); }
+function setTechnique(t){ studio.technique = t; document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active')); document.getElementById('m-'+t).classList.add('active'); addChronicle(`Technique: ${t.toUpperCase()}`); }
 function showPane(id){ document.querySelectorAll('.pane, .tab').forEach(el=>el.classList.remove('active')); document.getElementById(id).classList.add('active'); document.getElementById('tab-'+id).classList.add('active'); }
-function applyLang(){ studio.lang = document.getElementById('lang-policy').value; updateStudio(); }
-function paintOnCanvas(){ const c=document.getElementById('color-select').value; const v=parseFloat(document.getElementById('color-intensity').value); studio.scenery[c]+=(v/100)*PHI; studio.tension+=(v/5000); writeBook(`The canvas was painted with ${v} units of ${c}.`); updateStudio(); }
-function drawStroke(){ writeBook(`A new stroke was drawn on the subject.`); alert("Drawn."); }
-function peekWindow(){ writeBook("Gazing through the window for inspiration..."); setTimeout(()=>{ writeBook("A distant light pattern was sighted."); }, 1000); }
-function useTable(){ const input=document.getElementById('t-in').value; if(!input)return; document.getElementById('console').innerHTML+=`<div>> ${input}</div>`; writeBook("The table was used to sketch a new idea."); document.getElementById('t-in').value=''; }
-// ERASE処理
-function eraseCanvas(){ if(confirm(studio.lang==='jp'?"布を清め、最初から描き直しますか？":"Erase the canvas and start over?")){ localStorage.clear(); location.reload(); } }
-document.addEventListener('DOMContentLoaded', () => { PALETTE.forEach(c => document.getElementById('color-select').add(new Option(c, c))); updateStudio(); });
+function switchPalette(){ studio.lang = document.getElementById('studio-palette').value; updateStudioUI(); }
+
+function paintStroke(){
+    const c=document.getElementById('color-choice').value;
+    const v=parseFloat(document.getElementById('brush-intensity').value);
+    studio.scenery[c] += (v/100)*PHI;
+    studio.tension += (v/5000);
+    addChronicle(`Applied ${v} of ${c} color-system.`);
+    updateStudioUI();
+}
+
+function drawLayer(){ addChronicle(`A layer of stroke depth was applied.`); alert("Layered."); }
+function viewWindow(){ addChronicle("Observing external visual inspiration..."); setTimeout(()=>{ addChronicle("Remote visual signal harmonized."); }, 1000); }
+function applyTable(){ 
+    const input=document.getElementById('concept-in').value; if(!input)return;
+    document.getElementById('console').innerHTML+=`<div>> ${input}</div>`;
+    addChronicle("Conceptualized a sketch at the table.");
+    document.getElementById('concept-in').value=''; 
+}
+function eraseCanvas(){ if(confirm(studio.lang==='jp'?"表現を初期化し、布を清めますか？":"Clear the canvas and start fresh?")){ localStorage.clear(); location.reload(); } }
+
+document.addEventListener('DOMContentLoaded', () => { COLOR_SYSTEM.forEach(c => document.getElementById('color-choice').add(new Option(c, c))); updateStudioUI(); });
 </script>
 </body>
 </html>
