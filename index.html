@@ -75,7 +75,8 @@ input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px sol
             <div class="card">
                 <div class="card-title" data-key="title_clean"></div>
                 <select id="clean-target"></select>
-                <div style="height:48px;"></div> <button class="btn btn-danger" data-key="btn_clean" onclick="executeClean()"></button>
+                <div style="height:48px;"></div>
+                <button class="btn btn-danger" data-key="btn_clean" onclick="executeClean()"></button>
             </div>
         </div>
         <div class="card">
@@ -113,7 +114,7 @@ const TONES = {
 const DICTIONARY = {
     en: { 
         super_title: "TABULA RASA", tab_canvas: "CANVAS", tab_window: "DOOR", tab_table: "TABLE", tab_book: "RECORD",
-        title_state: "STATUS", title_colors: "COLORS", title_clean: "PURGE", title_painting: "SIGNING", title_window: "DOORWAY", title_table: "TABLE", title_book: "RECORD",
+        title_state: "STATUS", title_colors: "COLORS", title_clean: "CLEANING", title_painting: "SIGNING", title_window: "DOORWAY", title_table: "TABLE", title_book: "RECORD",
         btn_paint: "PAINT", btn_draw: "SIGN", btn_scan: "OPEN DOOR", btn_clean: "CLEAN UP", 
         label_z: "z-colors", label_w: "w-colors", placeholder: "Sign details...",
         door_closed: "Status: CLOSED", door_opening: "Status: OPENING...", door_sync: "Status: OPENED (Sync: ",
@@ -133,7 +134,7 @@ const DICTIONARY = {
     }
 };
 
-let studio = JSON.parse(localStorage.getItem('tabula_rasa_v66')) || { tension: 0.05, scenery: Object.fromEntries(COLOR_SYSTEM.map(c => [c, 0])), tone: 'neutral', lang: 'en', chronicles: [] };
+let studio = JSON.parse(localStorage.getItem('tabula_rasa_v67')) || { tension: 0.05, scenery: Object.fromEntries(COLOR_SYSTEM.map(c => [c, 0])), tone: 'neutral', lang: 'en', chronicles: [] };
 
 function applyTheme(isManual = false) {
     const theme = TONES[studio.tone];
@@ -151,7 +152,6 @@ function updateLabels() {
         if(d[k]) el.textContent = d[k];
     });
     
-    // トーン・掃除対象セレクトの更新
     updateSelect('ui-tone', d.tones, studio.tone);
     updateSelect('clean-target', d.targets, "studio");
 
@@ -179,7 +179,7 @@ function updateUI() {
     document.getElementById('chronicle-box').innerHTML = studio.chronicles.map(c => `<p><i>[${c.t}]</i> ${c.m}</p>`).reverse().join('');
 }
 
-function save() { localStorage.setItem('tabula_rasa_v66', JSON.stringify(studio)); }
+function save() { localStorage.setItem('tabula_rasa_v67', JSON.stringify(studio)); }
 
 function paintOnCanvas(){
     const c=document.getElementById('color-choice').value;
@@ -209,8 +209,10 @@ function executeClean() {
     if(target === 'canvas' || target === 'color') studio.scenery = Object.fromEntries(COLOR_SYSTEM.map(c => [c, 0]));
     if(target === 'record') studio.chronicles = [];
     if(target === 'sign') document.getElementById('subject-node').value = '';
+    if(target === 'door') { /* ドア状態のクリアが必要な場合はここに記述 */ }
+    if(target === 'table') document.getElementById('console').innerHTML = '';
     
-    writeChronicle(d.targets[target] + (studio.lang==='jp'?'を清めました':' purged.'));
+    writeChronicle(d.targets[target] + (studio.lang==='jp'?'を清めました':' cleaned.'));
     save(); updateUI();
 }
 
