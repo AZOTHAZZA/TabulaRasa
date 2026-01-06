@@ -36,7 +36,7 @@ input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px sol
 <header>
     <div class="brand">NEUTRAL STUDIO</div>
     <div style="display: flex; align-items: center; gap: 10px;">
-        <select id="ui-tone" onchange="applyTheme()" style="width:auto; margin:0; font-size:0.65rem; background:#000; color:#fff; border:1px solid #333;">
+        <select id="ui-tone" onchange="applyTheme(true)" style="width:auto; margin:0; font-size:0.65rem; background:#000; color:#fff; border:1px solid #333;">
             <option value="neutral">Neutral Tone</option>
             <option value="logical">Logical Tone</option>
             <option value="universal">Universal Tone</option>
@@ -101,6 +101,11 @@ const TONES = {
     logical: { bg: "#050a0f", surface: "#0a141e", accent: "#007bff", text: "#a0d1ff", border: "#1a3a5a" },
     universal: { bg: "#1a1612", surface: "#2a241e", accent: "#d4a017", text: "#fff4e0", border: "#4a3f35" }
 };
+const BRAND_NAMES = {
+    neutral: "NEUTRAL STUDIO",
+    logical: "LOGICAL STUDIO",
+    universal: "UNIVERSAL STUDIO"
+};
 const DICTIONARY = {
     en: { 
         tab_canvas: "CANVAS", tab_window: "WINDOW", tab_table: "TABLE", tab_book: "RECORD", tab_screen: "SCREEN",
@@ -116,13 +121,29 @@ const DICTIONARY = {
     }
 };
 
-let studio = JSON.parse(localStorage.getItem('neutral_studio_v59')) || { tension: 0.05, scenery: Object.fromEntries(COLOR_SYSTEM.map(c => [c, 0])), tone: 'neutral', lang: 'en', chronicles: [] };
+let studio = JSON.parse(localStorage.getItem('neutral_studio_v61')) || { tension: 0.05, scenery: Object.fromEntries(COLOR_SYSTEM.map(c => [c, 0])), tone: 'neutral', lang: 'en', chronicles: [] };
 
-function applyTheme() {
+function applyTheme(isManual = false) {
+    const prevTone = studio.tone;
     studio.tone = document.getElementById('ui-tone').value;
+    
+    // テーマ適用
     const theme = TONES[studio.tone];
     const root = document.documentElement;
     Object.keys(theme).forEach(key => root.style.setProperty(`--${key}`, theme[key]));
+    
+    // ブランド名の動的書き換え
+    document.querySelector('.brand').textContent = BRAND_NAMES[studio.tone];
+
+    // 手動切り替え時のみ記録に刻む
+    if(isManual && prevTone !== studio.tone) {
+        const phaseName = studio.tone.charAt(0).toUpperCase() + studio.tone.slice(1);
+        const msg = (studio.lang === 'jp') ? 
+            `相（トーン）を ${phaseName} Phase に切り替えました。` : 
+            `Tone shifted to ${phaseName} Phase.`;
+        writeChronicle(`--- ${msg} ---`);
+    }
+    
     save();
 }
 
@@ -144,7 +165,7 @@ function updateUI() {
     document.getElementById('chronicle-box').innerHTML = studio.chronicles.map(c => `<p><i>[${c.t}]</i> ${c.m}</p>`).reverse().join('');
 }
 
-function save() { localStorage.setItem('neutral_studio_v59', JSON.stringify(studio)); }
+function save() { localStorage.setItem('neutral_studio_v61', JSON.stringify(studio)); }
 
 function paintOnCanvas(){
     const c=document.getElementById('color-choice').value;
@@ -192,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
     COLOR_SYSTEM.forEach(c => sel.add(new Option(c, c)));
     document.getElementById('ui-tone').value = studio.tone;
     document.getElementById('ui-lang').value = studio.lang;
-    applyTheme(); updateLabels(); updateUI();
+    applyTheme(false); updateLabels(); updateUI();
 });
 </script>
 </body>
