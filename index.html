@@ -37,7 +37,7 @@ input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px sol
 <body>
 <header>
     <div class="brand-group">
-        <div class="super-title">TABULA RASA</div>
+        <div class="super-title" data-key="super_title"></div>
         <div class="brand">NEUTRAL STUDIO</div>
     </div>
     <div style="display: flex; align-items: center; gap: 10px;">
@@ -76,7 +76,12 @@ input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px sol
     </section>
 
     <section id="window" class="pane">
-        <div class="card"><div class="card-title" data-key="title_window"></div><button class="btn btn-neutral" data-key="btn_scan" onclick="peekWindow()"></button><div id="window-signals" style="margin-top:10px;"></div></div>
+        <div class="card">
+            <div class="card-title" data-key="title_window"></div>
+            <p id="door-status" style="font-size:0.7rem; color:var(--accent); margin-bottom:10px;">Status: CLOSED</p>
+            <button class="btn btn-neutral" data-key="btn_scan" onclick="peekWindow()"></button>
+            <div id="window-signals" style="margin-top:10px;"></div>
+        </div>
     </section>
 
     <section id="table" class="pane">
@@ -106,17 +111,23 @@ const TONES = {
     logical: { bg: "#050a0f", surface: "#0a141e", accent: "#007bff", text: "#a0d1ff", border: "#1a3a5a" },
     universal: { bg: "#1a1612", surface: "#2a241e", accent: "#d4a017", text: "#fff4e0", border: "#4a3f35" }
 };
-const BRAND_NAMES = {
-    neutral: "NEUTRAL STUDIO",
-    logical: "LOGICAL STUDIO",
-    universal: "UNIVERSAL STUDIO"
-};
+const BRAND_NAMES = { neutral: "NEUTRAL STUDIO", logical: "LOGICAL STUDIO", universal: "UNIVERSAL STUDIO" };
 const DICTIONARY = {
-    en: { tab_canvas: "CANVAS", tab_window: "WINDOW", tab_table: "TABLE", tab_book: "RECORD", tab_screen: "SCREEN", title_canvas: "CANVAS", title_colors: "COLORS", title_painting: "SIGNING", title_window: "WINDOW", title_table: "TABLE", title_book: "RECORD", title_screen: "SCREEN", btn_paint: "PAINT", btn_draw: "SIGN", btn_scan: "PEEK WINDOW", btn_erase: "CLEAN CANVAS", label_z: "z-colors", label_w: "w-colors", placeholder: "Sign details..." },
-    jp: { tab_canvas: "キャンバス", tab_window: "ウィンドウ", tab_table: "作業台", tab_book: "記録", tab_screen: "スクリーン", title_canvas: "キャンバス", title_colors: "絵の具", title_painting: "サイン", title_window: "ウィンドウ", title_table: "作業台", title_book: "記録", title_screen: "スクリーン", btn_paint: "色を乗せる", btn_draw: "サインする", btn_scan: "ウィンドウからなにかを見る", btn_erase: "キャンバスを綺麗にする", label_z: "zの色", label_w: "wの色", placeholder: "サインの内容..." }
+    en: { 
+        super_title: "TABULA RASA", tab_canvas: "CANVAS", tab_window: "DOOR", tab_table: "TABLE", tab_book: "RECORD", tab_screen: "SCREEN",
+        title_canvas: "CANVAS", title_colors: "COLORS", title_painting: "SIGNING", title_window: "DOORWAY", title_table: "TABLE", title_book: "RECORD", title_screen: "SCREEN", 
+        btn_paint: "PAINT", btn_draw: "SIGN", btn_scan: "OPEN DOOR", btn_erase: "CLEAN CANVAS", 
+        label_z: "z-colors", label_w: "w-colors", placeholder: "Sign details..." 
+    },
+    jp: { 
+        super_title: "タブラ・ラサ", tab_canvas: "キャンバス", tab_window: "ドア", tab_table: "作業台", tab_book: "記録", tab_screen: "スクリーン",
+        title_canvas: "キャンバス", title_colors: "絵の具", title_painting: "サイン", title_window: "ドア", title_table: "作業台", title_book: "記録", title_screen: "スクリーン", 
+        btn_paint: "色を乗せる", btn_draw: "サインする", btn_scan: "ドアを開ける", btn_erase: "キャンバスを綺麗にする", 
+        label_z: "zの色", label_w: "wの色", placeholder: "サインの内容..." 
+    }
 };
 
-let studio = JSON.parse(localStorage.getItem('tabula_rasa_v62')) || { tension: 0.05, scenery: Object.fromEntries(COLOR_SYSTEM.map(c => [c, 0])), tone: 'neutral', lang: 'en', chronicles: [] };
+let studio = JSON.parse(localStorage.getItem('tabula_rasa_v63')) || { tension: 0.05, scenery: Object.fromEntries(COLOR_SYSTEM.map(c => [c, 0])), tone: 'neutral', lang: 'en', chronicles: [] };
 
 function applyTheme(isManual = false) {
     const prevTone = studio.tone;
@@ -151,7 +162,7 @@ function updateUI() {
     document.getElementById('chronicle-box').innerHTML = studio.chronicles.map(c => `<p><i>[${c.t}]</i> ${c.m}</p>`).reverse().join('');
 }
 
-function save() { localStorage.setItem('tabula_rasa_v62', JSON.stringify(studio)); }
+function save() { localStorage.setItem('tabula_rasa_v63', JSON.stringify(studio)); }
 
 function paintOnCanvas(){
     const c=document.getElementById('color-choice').value;
@@ -178,11 +189,22 @@ function drawLayer(){
     const msg = (studio.lang === 'jp') ? `サインしました: ${val}` : `Signed: ${val}`;
     writeChronicle(msg); alert(msg); 
 }
+
 function peekWindow(){ 
-    const msg1 = (studio.lang === 'jp') ? "ウィンドウからなにかを見ています..." : "Observing through the window...";
-    const msg2 = (studio.lang === 'jp') ? "外部のパターンを調和させました。" : "External pattern harmonized.";
-    writeChronicle(msg1); setTimeout(()=>{ writeChronicle(msg2); }, 1000); 
+    const status = document.getElementById('door-status');
+    const msg1 = (studio.lang === 'jp') ? "ドアを開け、外の世界と同期しています..." : "Opening the door, syncing with the world...";
+    status.textContent = "Status: OPENING...";
+    status.style.color = "var(--text)";
+    
+    writeChronicle(msg1);
+    setTimeout(()=>{ 
+        const msg2 = (studio.lang === 'jp') ? "外部のパターンとの調和が完了しました。ドアを閉じます。" : "External synchronization complete. Closing door.";
+        writeChronicle(msg2); 
+        status.textContent = "Status: CLOSED (Last sync: " + new Date().toLocaleTimeString() + ")";
+        status.style.color = "var(--accent)";
+    }, 2000); 
 }
+
 function useTable(){ 
     const input=document.getElementById('concept-in').value; if(!input)return;
     document.getElementById('console').innerHTML+=`<div>> ${input}</div>`;
