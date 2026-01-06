@@ -9,8 +9,8 @@
     --bg: #0b0e11; --surface: #15191d; --accent: #6c757d; --text: #e9ecef; --border: #2d333b;
     --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
-body { font-family: 'Inter', 'Noto Sans JP', sans-serif; margin: 0; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-header { background: #000; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent); flex-shrink: 0; }
+body { font-family: 'Inter', 'Noto Sans JP', sans-serif; margin: 0; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; transition: background var(--transition); }
+header { background: #000; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent); flex-shrink: 0; transition: border var(--transition); }
 .brand-group { display: flex; flex-direction: column; }
 .super-title { font-size: 0.55rem; color: var(--accent); letter-spacing: 0.4em; font-weight: 300; line-height: 1; margin-bottom: 4px; }
 .brand { font-weight: 800; color: #fff; font-size: 0.85rem; letter-spacing: 0.15em; line-height: 1; }
@@ -20,7 +20,7 @@ nav { display: flex; background: #000; border-bottom: 1px solid #333; flex-shrin
 #viewport { flex-grow: 1; overflow-y: auto; padding: 15px; }
 .pane { display: none; width: 100%; max-width: 900px; margin: 0 auto; }
 .pane.active { display: block; }
-.card { background: var(--surface); border-radius: 10px; border: 1px solid var(--border); padding: 18px; margin-bottom: 15px; }
+.card { background: var(--surface); border-radius: 10px; border: 1px solid var(--border); padding: 18px; margin-bottom: 15px; transition: var(--transition); }
 .card-title { font-size: 0.65rem; font-weight: 700; color: #768390; margin-bottom: 12px; text-transform: uppercase; border-left: 3px solid var(--accent); padding-left: 10px; }
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
 .data-node { background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 12px; border-radius: 8px; text-align: center; }
@@ -38,9 +38,10 @@ input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px sol
 <header>
     <div class="brand-group">
         <div class="super-title" data-key="super_title">TABULA RASA</div>
-        <div class="brand" id="brand-display">CENTRAL BANK STUDIO</div>
+        <div class="brand" id="brand-display"></div>
     </div>
     <div style="display: flex; align-items: center; gap: 10px;">
+        <select id="ui-tone" onchange="applyTheme(true)" style="width:auto; margin:0; font-size:0.65rem; background:#000; color:#fff; border:1px solid #333;"></select>
         <select id="ui-lang" onchange="updateLabels()" style="width:auto; margin:0; font-size:0.65rem; background:#000; color:#fff; border:1px solid #333;">
             <option value="en">English</option>
             <option value="jp" selected>日本語</option>
@@ -115,10 +116,10 @@ input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px sol
 <script>
 const COLOR_SYSTEM=["USD","JPY","EUR","BTC","ETH","MATIC"];
 const PHI=1.618;
-
-let studio = JSON.parse(localStorage.getItem('tabula_rasa_v72_final')) || { 
-    tension: 0.05, scenery: Object.fromEntries(COLOR_SYSTEM.map(c => [c, 0])), lang: 'jp', chronicles: [],
-    gov: { cleaning: 'manual', door: 'manual', canvas: 'manual', sign: 'manual', table: 'manual', record: 'manual' }
+const TONES = {
+    neutral: { bg: "#0b0e11", surface: "#15191d", accent: "#6c757d", text: "#e9ecef", border: "#2d333b" },
+    logical: { bg: "#050a0f", surface: "#0a141e", accent: "#007bff", text: "#a0d1ff", border: "#1a3a5a" },
+    universal: { bg: "#1a1612", surface: "#2a241e", accent: "#d4a017", text: "#fff4e0", border: "#4a3f35" }
 };
 
 const DICTIONARY = {
@@ -127,7 +128,9 @@ const DICTIONARY = {
         title_canvas: "CANVAS", title_colors: "COLORS", title_clean: "CLEANING", title_painting: "SIGNING", title_window: "DOOR / LETTER", title_table: "TABLE", title_book: "RECORD", title_status: "STATUS", title_governance: "ADJUSTMENT", 
         btn_paint: "PAINT", btn_draw: "SIGN", btn_scan: "SEND LETTER", btn_clean: "CLEAN UP", btn_apply_gov: "SET STYLE", 
         label_z: "z-colors", label_w: "w-colors", label_ext_url: "Send To", label_target: "Target", label_mode: "Style", 
-        placeholder: "Sign details...", door_idle: "Status: IDLE", 
+        door_idle: "Status: IDLE",
+        brands: { neutral: "NEUTRAL STUDIO", logical: "LOGICAL STUDIO", universal: "UNIVERSAL STUDIO" },
+        tones: { neutral: "Neutral Tone", logical: "Logical Tone", universal: "Universal Tone" },
         modes: { manual: "By Self", automatic: "By System", autonomous: "Entrust" }, 
         targets: { canvas:"Canvas", cleaning:"Cleaning", sign:"Sign", door:"Door/Letter", table:"Table", record:"Record", status:"Status", studio:"Studio" } 
     },
@@ -136,13 +139,29 @@ const DICTIONARY = {
         title_canvas: "キャンバス", title_colors: "絵の具", title_clean: "掃除", title_painting: "サイン", title_window: "ドア / 手紙", title_table: "作業台", title_book: "記録", title_status: "状態", title_governance: "調整", 
         btn_paint: "色を乗せる", btn_draw: "サインする", btn_scan: "手紙を出す", btn_clean: "掃除する", btn_apply_gov: "設定を適用", 
         label_z: "zの色", label_w: "wの色", label_ext_url: "送り先", label_target: "対象", label_mode: "様式", 
-        placeholder: "サインの内容...", door_idle: "状態: 待機中", 
+        door_idle: "状態: 待機中",
+        brands: { neutral: "ニュートラル・スタジオ", logical: "ロジカル・スタジオ", universal: "ユニバーサル・スタジオ" },
+        tones: { neutral: "ニュートラル・トーン", logical: "ロジカル・トーン", universal: "ユニバーサル・トーン" },
         modes: { manual: "自分でやる", automatic: "やってもらう", autonomous: "まかせる" }, 
         targets: { canvas:"キャンバス", cleaning:"掃除", sign:"サイン", door:"ドア/手紙", table:"作業台", record:"記録", status:"状態", studio:"スタジオ" } 
     }
 };
 
-function save() { localStorage.setItem('tabula_rasa_v72_final', JSON.stringify(studio)); }
+let studio = JSON.parse(localStorage.getItem('tabula_rasa_v72_letter')) || { 
+    tension: 0.05, scenery: Object.fromEntries(COLOR_SYSTEM.map(c => [c, 0])), tone: 'neutral', lang: 'jp', chronicles: [],
+    gov: { cleaning: 'manual', door: 'manual', canvas: 'manual', sign: 'manual', table: 'manual', record: 'manual' }
+};
+
+function save() { localStorage.setItem('tabula_rasa_v72_letter', JSON.stringify(studio)); }
+
+function applyTheme(isManual = false) {
+    if(isManual) studio.tone = document.getElementById('ui-tone').value;
+    const theme = TONES[studio.tone];
+    const root = document.documentElement;
+    Object.keys(theme).forEach(key => root.style.setProperty(`--${key}`, theme[key]));
+    document.getElementById('brand-display').textContent = DICTIONARY[studio.lang].brands[studio.tone];
+    save();
+}
 
 function updateLabels() {
     studio.lang = document.getElementById('ui-lang').value;
@@ -152,10 +171,12 @@ function updateLabels() {
         if(d[k]) el.textContent = d[k];
     });
     updateSelect('color-choice', Object.fromEntries(COLOR_SYSTEM.map(c=>[c,c])), "USD");
+    updateSelect('ui-tone', d.tones, studio.tone);
     updateSelect('clean-target', d.targets, "studio");
     updateSelect('gov-target', d.targets, "canvas");
     updateSelect('gov-mode', d.modes, "manual");
     document.getElementById('door-status').textContent = d.door_idle;
+    applyTheme(false);
     updateUI();
 }
 
@@ -240,7 +261,10 @@ function writeChronicle(msg){
     updateUI();
 }
 
-document.addEventListener('DOMContentLoaded', () => { updateLabels(); });
+document.addEventListener('DOMContentLoaded', () => { 
+    document.getElementById('ui-lang').value = studio.lang;
+    updateLabels(); 
+});
 </script>
 </body>
 </html>
