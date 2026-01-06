@@ -53,18 +53,14 @@ input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px sol
     <button class="tab" id="tab-window" onclick="showPane('window')" data-key="tab_window"></button>
     <button class="tab" id="tab-table" onclick="showPane('table')" data-key="tab_table"></button>
     <button class="tab" id="tab-book" onclick="showPane('book')" data-key="tab_book"></button>
+    <button class="tab" id="tab-status" onclick="showPane('status')" data-key="tab_status"></button>
 </nav>
 <main id="viewport">
     <section id="canvas" class="pane active">
         <div class="card">
-            <div class="card-title" data-key="title_state"></div>
+            <div class="card-title" data-key="title_canvas"></div>
             <div class="grid" id="scenery-display"></div>
-            <div class="grid" style="margin-top:10px; border-top:1px solid var(--border); padding-top:10px;">
-                <div class="data-node"><div class="label" data-key="label_z"></div><div class="value" id="z-val">0</div></div>
-                <div class="data-node"><div class="label" data-key="label_w"></div><div class="value" id="w-val">0</div></div>
-            </div>
         </div>
-        
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
             <div class="card">
                 <div class="card-title" data-key="title_colors"></div>
@@ -73,15 +69,10 @@ input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px sol
                 <button class="btn btn-neutral" data-key="btn_paint" onclick="paintOnCanvas()"></button>
             </div>
             <div class="card">
-                <div class="card-title" data-key="title_clean"></div>
-                <select id="clean-target"></select>
-                <div style="height:48px;"></div>
-                <button class="btn btn-danger" data-key="btn_clean" onclick="executeClean()"></button>
+                <div class="card-title" data-key="title_painting"></div>
+                <input type="text" id="subject-node" placeholder="">
+                <button class="btn btn-neutral" data-key="btn_draw" onclick="drawLayer()"></button>
             </div>
-        </div>
-        <div class="card">
-            <div class="card-title" data-key="title_painting"></div>
-            <input type="text" id="subject-node" placeholder=""><button class="btn btn-neutral" data-key="btn_draw" onclick="drawLayer()"></button>
         </div>
     </section>
 
@@ -100,6 +91,21 @@ input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px sol
     <section id="book" class="pane">
         <div class="card"><div class="card-title" data-key="title_book"></div><div id="chronicle-box"></div></div>
     </section>
+
+    <section id="status" class="pane">
+        <div class="card">
+            <div class="card-title" data-key="title_status"></div>
+            <div class="grid">
+                <div class="data-node"><div class="label" data-key="label_z"></div><div class="value" id="z-val">0</div></div>
+                <div class="data-node"><div class="label" data-key="label_w"></div><div class="value" id="w-val">0</div></div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-title" data-key="title_clean"></div>
+            <select id="clean-target"></select>
+            <button class="btn btn-danger" data-key="btn_clean" onclick="executeClean()"></button>
+        </div>
+    </section>
 </main>
 
 <script>
@@ -113,8 +119,8 @@ const TONES = {
 
 const DICTIONARY = {
     en: { 
-        super_title: "TABULA RASA", tab_canvas: "CANVAS", tab_window: "DOOR", tab_table: "TABLE", tab_book: "RECORD",
-        title_state: "STATUS", title_colors: "COLORS", title_clean: "CLEANING", title_painting: "SIGNING", title_window: "DOORWAY", title_table: "TABLE", title_book: "RECORD",
+        super_title: "TABULA RASA", tab_canvas: "CANVAS", tab_window: "DOOR", tab_table: "TABLE", tab_book: "RECORD", tab_status: "STATUS",
+        title_canvas: "CANVAS", title_colors: "COLORS", title_clean: "CLEANING", title_painting: "SIGNING", title_window: "DOORWAY", title_table: "TABLE", title_book: "RECORD", title_status: "STATUS",
         btn_paint: "PAINT", btn_draw: "SIGN", btn_scan: "OPEN DOOR", btn_clean: "CLEAN UP", 
         label_z: "z-colors", label_w: "w-colors", placeholder: "Sign details...",
         door_closed: "Status: CLOSED", door_opening: "Status: OPENING...", door_sync: "Status: OPENED (Sync: ",
@@ -123,8 +129,8 @@ const DICTIONARY = {
         targets: { canvas:"Canvas", color:"Colors", sign:"Sign", door:"Door", table:"Table", record:"Record", status:"Status", studio:"Studio" }
     },
     jp: { 
-        super_title: "タブラ・ラサ", tab_canvas: "キャンバス", tab_window: "ドア", tab_table: "作業台", tab_book: "記録",
-        title_state: "状態", title_colors: "絵の具", title_clean: "掃除", title_painting: "サイン", title_window: "ドア", title_table: "作業台", title_book: "記録", 
+        super_title: "タブラ・ラサ", tab_canvas: "キャンバス", tab_window: "ドア", tab_table: "作業台", tab_book: "記録", tab_status: "状態",
+        title_canvas: "キャンバス", title_colors: "絵の具", title_clean: "掃除", title_painting: "サイン", title_window: "ドア", title_table: "作業台", title_book: "記録", title_status: "状態",
         btn_paint: "色を乗せる", btn_draw: "サインする", btn_scan: "ドアを開ける", btn_clean: "綺麗にする", 
         label_z: "zの色", label_w: "wの色", placeholder: "サインの内容...",
         door_closed: "状態: 閉鎖中", door_opening: "状態: 開放プロセス中...", door_sync: "状態: 開放中 (最終同期: ",
@@ -134,7 +140,7 @@ const DICTIONARY = {
     }
 };
 
-let studio = JSON.parse(localStorage.getItem('tabula_rasa_v67')) || { tension: 0.05, scenery: Object.fromEntries(COLOR_SYSTEM.map(c => [c, 0])), tone: 'neutral', lang: 'en', chronicles: [] };
+let studio = JSON.parse(localStorage.getItem('tabula_rasa_v68')) || { tension: 0.05, scenery: Object.fromEntries(COLOR_SYSTEM.map(c => [c, 0])), tone: 'neutral', lang: 'en', chronicles: [] };
 
 function applyTheme(isManual = false) {
     const theme = TONES[studio.tone];
@@ -179,7 +185,7 @@ function updateUI() {
     document.getElementById('chronicle-box').innerHTML = studio.chronicles.map(c => `<p><i>[${c.t}]</i> ${c.m}</p>`).reverse().join('');
 }
 
-function save() { localStorage.setItem('tabula_rasa_v67', JSON.stringify(studio)); }
+function save() { localStorage.setItem('tabula_rasa_v68', JSON.stringify(studio)); }
 
 function paintOnCanvas(){
     const c=document.getElementById('color-choice').value;
@@ -209,7 +215,6 @@ function executeClean() {
     if(target === 'canvas' || target === 'color') studio.scenery = Object.fromEntries(COLOR_SYSTEM.map(c => [c, 0]));
     if(target === 'record') studio.chronicles = [];
     if(target === 'sign') document.getElementById('subject-node').value = '';
-    if(target === 'door') { /* ドア状態のクリアが必要な場合はここに記述 */ }
     if(target === 'table') document.getElementById('console').innerHTML = '';
     
     writeChronicle(d.targets[target] + (studio.lang==='jp'?'を清めました':' cleaned.'));
