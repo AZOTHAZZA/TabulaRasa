@@ -38,14 +38,11 @@ input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px sol
 <header>
     <div class="brand-group">
         <div class="super-title" data-key="super_title"></div>
-        <div class="brand">NEUTRAL STUDIO</div>
+        <div class="brand" id="brand-display"></div>
     </div>
     <div style="display: flex; align-items: center; gap: 10px;">
         <select id="ui-tone" onchange="applyTheme(true)" style="width:auto; margin:0; font-size:0.65rem; background:#000; color:#fff; border:1px solid #333;">
-            <option value="neutral">Neutral Tone</option>
-            <option value="logical">Logical Tone</option>
-            <option value="universal">Universal Tone</option>
-        </select>
+            </select>
         <select id="ui-lang" onchange="updateLabels()" style="width:auto; margin:0; font-size:0.65rem; background:#000; color:#fff; border:1px solid #333;">
             <option value="en">English</option>
             <option value="jp">日本語</option>
@@ -111,36 +108,43 @@ const TONES = {
     logical: { bg: "#050a0f", surface: "#0a141e", accent: "#007bff", text: "#a0d1ff", border: "#1a3a5a" },
     universal: { bg: "#1a1612", surface: "#2a241e", accent: "#d4a017", text: "#fff4e0", border: "#4a3f35" }
 };
-const BRAND_NAMES = { neutral: "NEUTRAL STUDIO", logical: "LOGICAL STUDIO", universal: "UNIVERSAL STUDIO" };
+
 const DICTIONARY = {
     en: { 
         super_title: "TABULA RASA", tab_canvas: "CANVAS", tab_window: "DOOR", tab_table: "TABLE", tab_book: "RECORD", tab_screen: "SCREEN",
         title_canvas: "CANVAS", title_colors: "COLORS", title_painting: "SIGNING", title_window: "DOORWAY", title_table: "TABLE", title_book: "RECORD", title_screen: "SCREEN", 
-        btn_paint: "PAINT", btn_draw: "SIGN", btn_scan: "OPEN DOOR", btn_erase: "CLEAN CANVAS", 
+        btn_paint: "PAINT", btn_draw: "SIGN", btn_scan: "OPEN DOOR", btn_erase: "CLEAN STUDIO", 
         label_z: "z-colors", label_w: "w-colors", placeholder: "Sign details...",
-        door_closed: "Status: CLOSED", door_opening: "Status: OPENING...", door_sync: "Status: OPENED (Sync: "
+        door_closed: "Status: CLOSED", door_opening: "Status: OPENING...", door_sync: "Status: OPENED (Sync: ",
+        brands: { neutral: "NEUTRAL STUDIO", logical: "LOGICAL STUDIO", universal: "UNIVERSAL STUDIO" },
+        tones: { neutral: "Neutral Tone", logical: "Logical Tone", universal: "Universal Tone" }
     },
     jp: { 
         super_title: "タブラ・ラサ", tab_canvas: "キャンバス", tab_window: "ドア", tab_table: "作業台", tab_book: "記録", tab_screen: "スクリーン",
         title_canvas: "キャンバス", title_colors: "絵の具", title_painting: "サイン", title_window: "ドア", title_table: "作業台", title_book: "記録", title_screen: "スクリーン", 
-        btn_paint: "色を乗せる", btn_draw: "サインする", btn_scan: "ドアを開ける", btn_erase: "キャンバスを綺麗にする", 
+        btn_paint: "色を乗せる", btn_draw: "サインする", btn_scan: "ドアを開ける", btn_erase: "スタジオを綺麗にする", 
         label_z: "zの色", label_w: "wの色", placeholder: "サインの内容...",
-        door_closed: "状態: 閉鎖中", door_opening: "状態: 開放プロセス中...", door_sync: "状態: 開放中 (最終同期: "
+        door_closed: "状態: 閉鎖中", door_opening: "状態: 開放プロセス中...", door_sync: "状態: 開放中 (最終同期: ",
+        brands: { neutral: "ニュートラル・スタジオ", logical: "ロジカル・スタジオ", universal: "ユニバーサル・スタジオ" },
+        tones: { neutral: "ニュートラル・トーン", logical: "ロジカル・トーン", universal: "ユニバーサル・トーン" }
     }
 };
 
-let studio = JSON.parse(localStorage.getItem('tabula_rasa_v64')) || { tension: 0.05, scenery: Object.fromEntries(COLOR_SYSTEM.map(c => [c, 0])), tone: 'neutral', lang: 'en', chronicles: [] };
+let studio = JSON.parse(localStorage.getItem('tabula_rasa_v65')) || { tension: 0.05, scenery: Object.fromEntries(COLOR_SYSTEM.map(c => [c, 0])), tone: 'neutral', lang: 'en', chronicles: [] };
 
 function applyTheme(isManual = false) {
     const prevTone = studio.tone;
-    studio.tone = document.getElementById('ui-tone').value;
+    studio.tone = document.getElementById('ui-tone').value || studio.tone;
     const theme = TONES[studio.tone];
     const root = document.documentElement;
     Object.keys(theme).forEach(key => root.style.setProperty(`--${key}`, theme[key]));
-    document.querySelector('.brand').textContent = BRAND_NAMES[studio.tone];
+    
+    // ブランド名の表示を更新
+    document.getElementById('brand-display').textContent = DICTIONARY[studio.lang].brands[studio.tone];
+
     if(isManual && prevTone !== studio.tone) {
-        const phaseName = studio.tone.charAt(0).toUpperCase() + studio.tone.slice(1);
-        const msg = (studio.lang === 'jp') ? `相（トーン）を ${phaseName} Phase に切り替えました。` : `Tone shifted to ${phaseName} Phase.`;
+        const toneName = DICTIONARY[studio.lang].tones[studio.tone];
+        const msg = (studio.lang === 'jp') ? `相（トーン）を ${toneName} に切り替えました。` : `Tone shifted to ${toneName}.`;
         writeChronicle(`--- ${msg} ---`);
     }
     save();
@@ -149,16 +153,31 @@ function applyTheme(isManual = false) {
 function updateLabels() {
     studio.lang = document.getElementById('ui-lang').value;
     const d = DICTIONARY[studio.lang];
+    
+    // 一般ラベルの更新
     document.querySelectorAll('[data-key]').forEach(el => {
         const k = el.getAttribute('data-key');
         if(d[k]) el.textContent = d[k];
     });
     document.getElementById('subject-node').placeholder = d.placeholder;
-    // ドアの状態表示を即座に更新
+
+    // トーン選択セレクトボックスの更新
+    const toneSelect = document.getElementById('ui-tone');
+    const currentTone = studio.tone;
+    toneSelect.innerHTML = '';
+    Object.keys(TONES).forEach(key => {
+        const opt = new Option(d.tones[key], key);
+        if(key === currentTone) opt.selected = true;
+        toneSelect.add(opt);
+    });
+
+    // ドアの状態表示の更新
     const status = document.getElementById('door-status');
     if(!status.textContent || status.textContent.includes("状態") || status.textContent.includes("Status")) {
         status.textContent = d.door_closed;
     }
+
+    applyTheme(false); // 言語切り替えに合わせてブランド表示などを再描画
     save();
 }
 
@@ -169,7 +188,7 @@ function updateUI() {
     document.getElementById('chronicle-box').innerHTML = studio.chronicles.map(c => `<p><i>[${c.t}]</i> ${c.m}</p>`).reverse().join('');
 }
 
-function save() { localStorage.setItem('tabula_rasa_v64', JSON.stringify(studio)); }
+function save() { localStorage.setItem('tabula_rasa_v65', JSON.stringify(studio)); }
 
 function paintOnCanvas(){
     const c=document.getElementById('color-choice').value;
@@ -221,16 +240,16 @@ function useTable(){
     writeChronicle(msg); document.getElementById('concept-in').value=''; 
 }
 function eraseCanvas(){ 
-    const msg = (studio.lang === 'jp') ? "キャンバスを綺麗にしますか？" : "Clean the canvas and reset?";
+    const msg = (studio.lang === 'jp') ? "スタジオを綺麗にしますか？" : "Clean the studio and reset?";
     if(confirm(msg)){ localStorage.clear(); location.reload(); } 
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     const sel = document.getElementById('color-choice');
     COLOR_SYSTEM.forEach(c => sel.add(new Option(c, c)));
-    document.getElementById('ui-tone').value = studio.tone;
     document.getElementById('ui-lang').value = studio.lang;
-    applyTheme(false); updateLabels(); updateUI();
+    updateLabels(); // これが applyTheme を呼び出す
+    updateUI();
 });
 </script>
 </body>
