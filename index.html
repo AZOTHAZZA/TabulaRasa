@@ -201,11 +201,20 @@ function showPane(id) {
 }
 
 function paintOnCanvas(){
-    const c=document.getElementById('color-choice').value;
-    const v=parseFloat(document.getElementById('brush-intensity').value);
-    studio.scenery[c] += (v/100)*PHI; studio.tension += (v/5000);
-    writeChronicle(studio.lang==='jp'?`${c}に${v}を乗せました`:`Applied ${v} of ${c}`);
-    save(); updateUI();
+    const c = document.getElementById('color-choice').value;
+    const v = parseFloat(document.getElementById('brush-intensity').value);
+    
+    // 修正：入力された数値 v をそのまま加算する（/100 も *PHI も排除）
+    if (!isNaN(v)) {
+        studio.scenery[c] += v; 
+        
+        // テンションは「操作の積み重ね」の指標として、微増させる程度に留める
+        studio.tension += 0.001; 
+        
+        writeChronicle(studio.lang==='jp' ? `${c}に ${v} を追加しました` : `Added ${v} to ${c}`);
+        save(); 
+        updateUI();
+    }
 }
 
 function drawLayer(){ 
