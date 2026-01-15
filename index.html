@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tabula Rasa - Pure Mobius</title>
+<title>Tabula Rasa - Pure Mobius Bridge</title>
 <style>
 :root { --ratio: 1.618; --bg: #0b0e11; --surface: #15191d; --accent: #6c757d; --text: #e9ecef; --border: #2d333b; --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
 body { font-family: 'Inter', 'Noto Sans JP', sans-serif; margin: 0; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
@@ -26,6 +26,7 @@ input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px sol
 .btn { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.75rem; transition: 0.2s; outline: none; margin-top: 5px;}
 .btn-neutral { background: var(--accent); color: #fff; }
 .btn-danger { background: #a71d2a; color: #fff; }
+.btn-bridge { background: #4a3f35; color: #d4a017; border: 1px solid #d4a017; }
 </style>
 </head>
 <body>
@@ -65,9 +66,14 @@ input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px sol
                 </div>
             </div>
             <div class="card">
-                <div class="card-title" data-key="title_painting">SIGN</div>
-                <input type="text" id="subject-node" placeholder="Sign..."><button class="btn btn-neutral" data-key="btn_draw" onclick="drawLayer()">Sign</button>
+                <div class="card-title">BRIDGE (Plusへの移転)</div>
+                <div class="label">移動先の宇宙：TabulaRasaPlus</div>
+                <button class="btn btn-bridge" onclick="transferToPlus()">数理を転送する (Transfer)</button>
             </div>
+        </div>
+        <div class="card">
+            <div class="card-title" data-key="title_painting">SIGN</div>
+            <input type="text" id="subject-node" placeholder="Sign..."><button class="btn btn-neutral" data-key="btn_draw" onclick="drawLayer()">Sign</button>
         </div>
     </section>
 
@@ -141,7 +147,6 @@ function updateLabels() {
         const k = el.getAttribute('data-key');
         if(d[k]) el.textContent = d[k];
     });
-    // Selectボックスの更新
     const sel = document.getElementById('color-choice');
     sel.innerHTML = '';
     COLOR_SYSTEM.forEach(c => sel.add(new Option(c, c)));
@@ -166,6 +171,33 @@ function paintOnCanvas(sign){
         studio.tension = Math.abs((studio.tension + (actualChange / 1000)) % (PHI * 2));
         save(); updateUI();
     }
+}
+
+function transferToPlus() {
+    const c = document.getElementById('color-choice').value;
+    const v = Math.abs(parseFloat(document.getElementById('brush-intensity').value));
+    
+    if (isNaN(v) || v <= 0) { alert("数量を入力してください / Enter quantity"); return; }
+    if ((studio.scenery[c] || 0) < v) { alert("残高が不足しています / Insufficient balance"); return; }
+
+    // 1. TabulaRasa（源泉）から減算
+    studio.scenery[c] -= v;
+    
+    // 2. 移動用パケットの作成
+    const transferPacket = {
+        unit: c,
+        amount: v,
+        timestamp: Date.now(),
+        sender: "TabulaRasa_Origin"
+    };
+
+    // 3. 共有領域（localStorage）へ書き出し
+    localStorage.setItem('TR_Bridge_to_Plus', JSON.stringify(transferPacket));
+    
+    save();
+    updateUI();
+
+    alert(`次元移動完了: ${v} ${c} を Plus へ送出しました。`);
 }
 
 function showPane(id) {
