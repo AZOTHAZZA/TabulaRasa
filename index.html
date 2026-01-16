@@ -72,7 +72,7 @@ input, select { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid
                     <button class="btn btn-neutral" onclick="vanningToWarehouse()" data-key="btn_vanning">倉庫へ積み込み (ヴァンニング)</button>
                 </div>
                 <div style="display:flex; align-items:flex-end;">
-                    <button class="btn btn-bridge" onclick="moveToExport()" data-key="btn_move_export">輸出港 A へ輸送</button>
+                    <button class="btn btn-bridge" onclick="moveToExport()" data-key="btn_move_export">輸出港 A へ輸送 (トランスポート)</button>
                 </div>
             </div>
         </div>
@@ -91,7 +91,7 @@ input, select { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid
                 <div class="grid-mini" id="import-display" style="margin-bottom:10px;"></div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
                     <button class="btn btn-neutral" onclick="devanningToWarehouse()" data-key="btn_devanning">倉庫へ積み下ろし</button>
-                    <button class="btn btn-bridge" onclick="checkArrival()" data-key="btn_arrival">入港を承認 (入港確認)</button>
+                    <button class="btn btn-bridge" onclick="checkArrival()" data-key="btn_arrival">入力確認・入港承認 (アライバル)</button>
                 </div>
             </div>
         </div>
@@ -130,7 +130,7 @@ const DICTIONARY = {
         tab_canvas: "PORT A", tab_book: "ARCHIVE", tab_status: "STATUS", 
         title_total: "PORT A TOTAL", title_warehouse: "PORT A WAREHOUSE",
         title_export: "EXPORT PORT A", title_import: "IMPORT PORT A",
-        btn_vanning: "VANNING TO WAREHOUSE", btn_move_export: "TRANSPORT TO EXPORT A",
+        btn_vanning: "VANNING TO WAREHOUSE", btn_move_export: "TRANSPORT TO EXPORT PORT A",
         btn_sailing: "SAILING", btn_arrival: "APPROVE ARRIVAL", btn_devanning: "DEVANNING",
         label_z: "z-Status", label_w: "w-Status", title_book: "ARCHIVE", title_status: "PORT STATUS", title_reset: "CLEAN", btn_reset: "Clean Port"
     },
@@ -139,13 +139,13 @@ const DICTIONARY = {
         tab_canvas: "港 A (ポートA)", tab_book: "公文書", tab_status: "状態", 
         title_total: "港 A 全体 (ポートA全体)", title_warehouse: "港 A 倉庫 (ポートA倉庫)",
         title_export: "輸出港 A (エクスポート・ポートA)", title_import: "輸入港 A (インポート・ポートA)",
-        btn_vanning: "倉庫へ積み込み (ヴァンニング)", btn_move_export: "輸出港 A へ輸送",
-        btn_sailing: "出港 (セーリング)", btn_arrival: "入港を承認 (入港確認)", btn_devanning: "倉庫へ積み下ろし (デヴァンニング)",
+        btn_vanning: "倉庫へ積み込み (ヴァンニング)", btn_move_export: "輸出港 A へ輸送 (トランスポート)",
+        btn_sailing: "出港 (セーリング)", btn_arrival: "入力確認・入港承認 (アライバル)", btn_devanning: "倉庫へ積み下ろし (デヴァンニング)",
         label_z: "zの状態", label_w: "wの状態", title_book: "公文書記録", title_status: "港の状態", title_reset: "港の掃除", btn_reset: "港を掃除する"
     }
 };
 
-let studio = JSON.parse(localStorage.getItem('tabula_rasa_port_a_v14.1')) || { 
+let studio = JSON.parse(localStorage.getItem('tabula_rasa_port_a_v14.2')) || { 
     tension: 0.05, 
     assets: {
         warehouse: Object.fromEntries(COLOR_SYSTEM.map(c => [c, 0])),
@@ -155,7 +155,7 @@ let studio = JSON.parse(localStorage.getItem('tabula_rasa_port_a_v14.1')) || {
     tone: 'neutral', lang: 'jp', chronicles: []
 };
 
-function save() { localStorage.setItem('tabula_rasa_port_a_v14.1', JSON.stringify(studio)); }
+function save() { localStorage.setItem('tabula_rasa_port_a_v14.2', JSON.stringify(studio)); }
 
 function renderGrid(targetId, data) {
     document.getElementById(targetId).innerHTML = COLOR_SYSTEM.map(c => `
@@ -204,7 +204,7 @@ function moveToExport() {
     if (studio.assets.warehouse[c] < v) return alert("倉庫残高不足");
     studio.assets.warehouse[c] -= v;
     studio.assets.export[c] += v;
-    writeChronicle(`${v} ${c} を輸出港 A へ輸送`);
+    writeChronicle(`${v} ${c} を輸出港 A へ輸送 (トランスポート)`);
     save(); updateUI();
 }
 
@@ -233,7 +233,7 @@ function checkArrival() {
     const p = JSON.parse(incoming);
     studio.assets.import[p.unit] += p.amount;
     localStorage.removeItem('TR_Bridge_to_PORT_A');
-    writeChronicle(`[承認] ${p.from} より到着の ${p.amount} ${p.unit} を捕捉`);
+    writeChronicle(`[承認] ${p.from} より到着の ${p.amount} ${p.unit} を捕捉 (アライバル)`);
     save(); updateUI();
 }
 
