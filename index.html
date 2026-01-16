@@ -80,20 +80,20 @@ input, select { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid
             <div class="card">
                 <div class="card-title" data-key="title_export">輸出港 A (エクスポート)</div>
                 <div class="grid-mini" id="export-display" style="margin-bottom:10px;"></div>
-                <label class="label" style="margin-top:5px;">出港先 (DESTINATION):</label>
+                <label class="label" style="margin-top:5px;">出港先指定 (DESTINATION):</label>
                 <select id="destination-select">
                     <option value="PORT_B">PURE PORT B</option>
                     <option value="EXTERNAL">OUTER WORLD (外部)</option>
                 </select>
-                <button class="btn btn-bridge" onclick="sailing()" data-key="btn_sailing">出港を決定する (セーリング)</button>
+                <button class="btn btn-bridge" onclick="sailing()" data-key="btn_sailing">輸出港 A へ輸送 (セーリング)</button>
             </div>
             <div class="card">
                 <div class="card-title" data-key="title_import">輸入港 A (インポート)</div>
                 <div id="import-manifest" class="manifest-view">待機中の輸送体なし</div>
                 <div class="grid-mini" id="import-display" style="margin-bottom:10px;"></div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
-                    <button class="btn btn-neutral" onclick="checkArrival()" data-key="btn_arrival">入港を承認</button>
                     <button class="btn btn-neutral" onclick="devanningToWarehouse()" data-key="btn_devanning">倉庫へ積み下ろし</button>
+                    <button class="btn btn-bridge" onclick="checkArrival()" data-key="btn_arrival">入港を承認 (入港確認)</button>
                 </div>
             </div>
         </div>
@@ -133,7 +133,7 @@ const DICTIONARY = {
         title_total: "PORT A TOTAL BALANCE", title_warehouse: "PORT A WAREHOUSE",
         title_export: "EXPORT PORT A", title_import: "IMPORT PORT A",
         btn_vanning: "VANNING TO WAREHOUSE", btn_move_export: "MOVE TO EXPORT",
-        btn_sailing: "CONFIRM SAILING", btn_arrival: "APPROVE ARRIVAL", btn_devanning: "DEVANNING TO WAREHOUSE",
+        btn_sailing: "TRANSPORT EXPORT A", btn_arrival: "APPROVE ARRIVAL", btn_devanning: "DEVANNING",
         label_z: "z-Status", label_w: "w-Status", title_book: "ARCHIVE", title_status: "PORT STATUS", title_reset: "CLEAN", btn_reset: "Clean Port"
     },
     jp: { 
@@ -142,12 +142,12 @@ const DICTIONARY = {
         title_total: "港 A 全体 (ポートA全体) の残高", title_warehouse: "港 A 倉庫 (ポートA倉庫)",
         title_export: "輸出港 A (エクスポート・ポートA)", title_import: "輸入港 A (インポート・ポートA)",
         btn_vanning: "倉庫へ積み込み (ヴァンニング)", btn_move_export: "輸出港 A へ回送",
-        btn_sailing: "出港を決定する (セーリング)", btn_arrival: "入港を承認 (入港確認)", btn_devanning: "倉庫へ積み下ろし (デヴァンニング)",
+        btn_sailing: "輸出港 A へ輸送 (セーリング)", btn_arrival: "入港を承認 (入港確認)", btn_devanning: "倉庫へ積み下ろし (デヴァンニング)",
         label_z: "zの状態", label_w: "wの状態", title_book: "公文書記録", title_status: "港の状態", title_reset: "港の掃除", btn_reset: "港を掃除する"
     }
 };
 
-let studio = JSON.parse(localStorage.getItem('tabula_rasa_port_a_v12')) || { 
+let studio = JSON.parse(localStorage.getItem('tabula_rasa_port_a_v13')) || { 
     tension: 0.05, 
     assets: {
         warehouse: Object.fromEntries(COLOR_SYSTEM.map(c => [c, 0])),
@@ -157,7 +157,7 @@ let studio = JSON.parse(localStorage.getItem('tabula_rasa_port_a_v12')) || {
     tone: 'neutral', lang: 'jp', chronicles: []
 };
 
-function save() { localStorage.setItem('tabula_rasa_port_a_v12', JSON.stringify(studio)); }
+function save() { localStorage.setItem('tabula_rasa_port_a_v13', JSON.stringify(studio)); }
 
 function renderGrid(targetId, data) {
     document.getElementById(targetId).innerHTML = COLOR_SYSTEM.map(c => `
@@ -179,7 +179,6 @@ function updateUI() {
     document.getElementById('w-val').textContent = (1 / (mz || 0.001)).toFixed(6);
     document.getElementById('chronicle-box').innerHTML = (studio.chronicles || []).map(c => `<p><i>[${c.t}]</i> ${c.m}</p>`).reverse().join('');
     
-    // 入港情報の監視
     const incoming = localStorage.getItem('TR_Bridge_to_A');
     const display = document.getElementById('import-manifest');
     if (incoming) {
@@ -188,11 +187,9 @@ function updateUI() {
         display.style.color = "#00ff00";
     } else {
         display.textContent = "待機中の輸送体なし";
-        display.style.color = varName('--accent');
+        display.style.color = "var(--accent)";
     }
 }
-
-function varName(name) { return getComputedStyle(document.documentElement).getPropertyValue(name); }
 
 function vanningToWarehouse() {
     const c = document.getElementById('color-choice').value;
@@ -213,30 +210,23 @@ function moveToExport() {
     save(); updateUI();
 }
 
-// 修正：出港先の決定ロジック
 function sailing() {
     const c = document.getElementById('color-choice').value;
     const v = studio.assets.export[c];
     const dest = document.getElementById('destination-select').value;
-    
     if (v <= 0) return alert("輸出港に資産がありません");
-
     studio.assets.export[c] = 0;
     const manifest = { 
-        unit: c, 
-        amount: v, 
-        from: "PORT_A", 
+        unit: c, amount: v, from: "PORT_A", 
         id: "MANI-" + Math.floor(Date.now()/1000).toString(16).toUpperCase() 
     };
-    
     if (dest === "PORT_B") {
         localStorage.setItem('TR_Bridge_to_B', JSON.stringify(manifest));
-        writeChronicle(`[決定] PORT B へ向けて ${v} ${c} が出港 (ID: ${manifest.id})`);
+        writeChronicle(`[輸送] PORT B へ向けて ${v} ${c} を輸送 (ID: ${manifest.id})`);
     } else {
         localStorage.setItem('TR_Bridge_to_EXTERNAL', JSON.stringify(manifest));
-        writeChronicle(`[決定] 外部領域へ ${v} ${c} が放出されました (ID: ${manifest.id})`);
+        writeChronicle(`[輸送] 外部へ ${v} ${c} を放出 (ID: ${manifest.id})`);
     }
-    
     save(); updateUI();
 }
 
@@ -244,10 +234,9 @@ function checkArrival() {
     const incoming = localStorage.getItem('TR_Bridge_to_A');
     if (!incoming) return alert("入港信号がありません");
     const p = JSON.parse(incoming);
-    
     studio.assets.import[p.unit] += p.amount;
     localStorage.removeItem('TR_Bridge_to_A');
-    writeChronicle(`[承認] ${p.from} より到着した ${p.amount} ${p.unit} を輸入港 A に捕捉`);
+    writeChronicle(`[承認] ${p.from} より到着の ${p.amount} ${p.unit} を捕捉`);
     save(); updateUI();
 }
 
@@ -259,7 +248,7 @@ function devanningToWarehouse() {
             studio.assets.warehouse[unit] += amt;
             studio.assets.import[unit] = 0;
             moved = true;
-            writeChronicle(`${amt} ${unit} を輸入港 A から倉庫へ積み下ろし (デヴァンニング)`);
+            writeChronicle(`${amt} ${unit} を倉庫へ積み下ろし (デヴァンニング)`);
         }
     });
     if (!moved) return alert("輸入港に荷がありません");
