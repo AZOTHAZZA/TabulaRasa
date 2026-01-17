@@ -4,7 +4,7 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tabula Rasa - PURE PORT A</title>
 <style>
-/* スタイル定義（変更なし） */
+/* 基礎スタイル（継承） */
 :root { --ratio: 1.618; --bg: #0b0e11; --surface: #15191d; --accent: #6c757d; --text: #e9ecef; --border: #2d333b; }
 body { font-family: 'Inter', 'Noto Sans JP', sans-serif; margin: 0; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 header { background: #000; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent); flex-shrink: 0; }
@@ -12,24 +12,54 @@ header { background: #000; padding: 12px 20px; display: flex; justify-content: s
 .super-title { font-size: 0.55rem; color: var(--accent); letter-spacing: 0.4em; font-weight: 300; line-height: 1; margin-bottom: 4px; }
 .brand { font-weight: 800; color: #fff; font-size: 0.85rem; letter-spacing: 0.15em; line-height: 1; }
 nav { display: flex; background: #000; border-bottom: 1px solid #333; flex-shrink: 0; }
-.tab { flex: 1; padding: 12px; border: none; background: none; color: #666; font-weight: bold; cursor: pointer; font-size: 0.65rem; border-bottom: 2px solid transparent; text-transform: uppercase; outline: none; }
+.tab { flex: 1; padding: 12px; border: none; background: none; color: #666; font-weight: bold; cursor: pointer; font-size: 0.65rem; border-bottom: 2px solid transparent; text-transform: uppercase; outline: none; transition: 0.3s; }
 .tab.active { color: #fff; border-bottom-color: var(--accent); background: #1a1a1a; }
-#viewport { flex-grow: 1; overflow-y: auto; padding: 15px; }
+#viewport { flex-grow: 1; overflow-y: auto; padding: 15px; scroll-behavior: smooth; }
 .pane { display: none; width: 100%; max-width: 1000px; margin: 0 auto; }
 .pane.active { display: block; }
-.card { background: var(--surface); border-radius: 10px; border: 1px solid var(--border); padding: 15px; margin-bottom: 15px; }
+.card { background: var(--surface); border-radius: 10px; border: 1px solid var(--border); padding: 15px; margin-bottom: 15px; transition: 0.3s ease; }
 .card-title { font-size: 0.6rem; font-weight: 700; color: #768390; margin-bottom: 10px; text-transform: uppercase; border-left: 3px solid var(--accent); padding-left: 10px; }
+
+/* 1. モーション：鼓動とフラッシュ */
+@keyframes pulse-bridge {
+    0% { border-color: var(--accent); box-shadow: 0 0 5px transparent; }
+    50% { border-color: #00ff00; box-shadow: 0 0 15px rgba(0, 255, 0, 0.2); }
+    100% { border-color: var(--accent); box-shadow: 0 0 5px transparent; }
+}
+.manifest-active { animation: pulse-bridge 2s infinite; border-style: solid !important; }
+
+.flash-update { animation: flash-bg 0.6s ease-out; }
+@keyframes flash-bg {
+    0% { background: rgba(108, 117, 125, 0.3); }
+    100% { background: rgba(0,0,0,0.2); }
+}
+
+/* グリッドとノード */
 .grid-mini { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; }
-.data-node { background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 8px; border-radius: 6px; text-align: center; }
+.data-node { background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 8px; border-radius: 6px; text-align: center; transition: 0.3s; }
 .label { font-size: 0.5rem; color: #768390; margin-bottom: 2px; }
 .value { font-family: monospace; font-weight: bold; font-size: 0.75rem; color: var(--text); }
-input, select { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #444; border-radius: 6px; background: rgba(0,0,0,0.3); color: #fff; font-size: 0.75rem; outline: none; box-sizing: border-box;}
-.btn { width: 100%; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.7rem; transition: 0.2s; outline: none; margin-top: 5px;}
+
+/* 入力とボタン */
+input, select { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #444; border-radius: 6px; background: rgba(0,0,0,0.3); color: #fff; font-size: 0.75rem; outline: none; box-sizing: border-box; transition: 0.2s;}
+.btn { width: 100%; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.7rem; transition: 0.3s; outline: none; margin-top: 5px;}
+.btn:disabled { cursor: not-allowed; filter: grayscale(1); opacity: 0.3; }
 .btn-neutral { background: var(--accent); color: #fff; }
 .btn-danger { background: #a71d2a; color: #fff; }
 .btn-bridge { background: #4a3f35; color: #d4a017; border: 1px solid #d4a017; }
+
+/* 公文書 */
 #chronicle-box { background: rgba(0,0,0,0.3); color: var(--text); padding: 12px; font-family: 'Georgia', serif; font-size: 0.8rem; height: 180px; overflow-y: auto; border-radius: 6px; border: 1px solid var(--border); line-height: 1.5; }
-.manifest-view { background: #000; padding: 10px; border-radius: 4px; margin-bottom: 10px; border: 1px dashed var(--accent); font-size: 0.65rem; color: #00ff00; font-family: monospace; }
+.manifest-view { background: #000; padding: 10px; border-radius: 4px; margin-bottom: 10px; border: 1px dashed var(--accent); font-size: 0.65rem; color: #00ff00; font-family: monospace; min-height: 40px; display: flex; align-items: center; justify-content: center; text-align: center; }
+
+/* 3. モバイル・レスポンシブの微調整 */
+@media (max-width: 600px) {
+    header { padding: 8px 15px; }
+    .brand { font-size: 0.75rem; }
+    .grid-mini { grid-template-columns: repeat(3, 1fr); }
+    #pane-canvas > div:last-child { grid-template-columns: 1fr !important; } /* 輸出入を縦並びに */
+    .tab { font-size: 0.6rem; padding: 10px 5px; }
+}
 </style>
 </head>
 <body>
@@ -57,41 +87,41 @@ input, select { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid
 </nav>
 <main id="viewport">
     <section id="pane-canvas" class="pane active">
-        <div class="card">
+        <div class="card" id="card-total">
             <div class="card-title" data-key="title_total">港 A 全体</div>
             <div class="grid-mini" id="total-display"></div>
         </div>
         
-        <div class="card" style="border-color: var(--accent);">
+        <div class="card" id="card-warehouse" style="border-color: var(--accent);">
             <div class="card-title" data-key="title_warehouse">港 A 倉庫</div>
             <div class="grid-mini" id="warehouse-display" style="margin-bottom:10px;"></div>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
                 <div>
-                    <select id="color-choice"></select>
-                    <input type="number" id="brush-intensity" value="100">
-                    <button class="btn btn-neutral" onclick="vanningAction()" data-key="btn_vanning">倉庫へ積み込み</button>
+                    <select id="color-choice" onchange="updateButtonStates()"></select>
+                    <input type="number" id="brush-intensity" value="100" oninput="updateButtonStates()">
+                    <button class="btn btn-neutral" id="btn-vanning" onclick="vanningAction()" data-key="btn_vanning">積み込み</button>
                 </div>
                 <div style="display:flex; align-items:flex-end;">
-                    <button class="btn btn-bridge" onclick="transportAction()" data-key="btn_move_export">輸出港 A へ輸送</button>
+                    <button class="btn btn-bridge" id="btn-transport" onclick="transportAction()" data-key="btn_move_export">輸送</button>
                 </div>
             </div>
         </div>
 
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
-            <div class="card">
+            <div class="card" id="card-export">
                 <div class="card-title" data-key="title_export">輸出港 A</div>
                 <div class="grid-mini" id="export-display" style="margin-bottom:10px;"></div>
                 <label class="label" data-key="label_dest">出港先:</label>
                 <input type="text" id="destination-input" value="PORT_B">
-                <button class="btn btn-bridge" onclick="sailingAction()" data-key="btn_sailing">出港</button>
+                <button class="btn btn-bridge" id="btn-sailing" onclick="sailingAction()" data-key="btn_sailing">出港</button>
             </div>
-            <div class="card">
+            <div class="card" id="card-import">
                 <div class="card-title" data-key="title_import">輸入港 A</div>
                 <div id="import-manifest" class="manifest-view"></div>
                 <div class="grid-mini" id="import-display" style="margin-bottom:10px;"></div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
-                    <button class="btn btn-neutral" onclick="devanningAction()" data-key="btn_devanning">積み下ろし</button>
-                    <button class="btn btn-bridge" onclick="arrivalAction()" data-key="btn_arrival">入港承認</button>
+                    <button class="btn btn-neutral" id="btn-devanning" onclick="devanningAction()" data-key="btn_devanning">積み下ろし</button>
+                    <button class="btn btn-bridge" id="btn-arrival" onclick="arrivalAction()" data-key="btn_arrival">入港承認</button>
                 </div>
             </div>
         </div>
@@ -142,15 +172,13 @@ let studio = {
     tone: 'neutral', lang: 'jp', chronicles: []
 };
 
+/* --- 保存と同期 --- */
 function save() {
-    const rawData = {
+    localStorage.setItem('tabula_rasa_port_a_v15_pure', JSON.stringify({
         tension: studio.z,
-        assets: {
-            warehouse: studio.ports.warehouse.assets, export: studio.ports.export.assets, import: studio.ports.import.assets
-        },
+        assets: { warehouse: studio.ports.warehouse.assets, export: studio.ports.export.assets, import: studio.ports.import.assets },
         tone: studio.tone, lang: studio.lang, chronicles: studio.chronicles
-    };
-    localStorage.setItem('tabula_rasa_port_a_v15_pure', JSON.stringify(rawData));
+    }));
 }
 
 function load() {
@@ -170,6 +198,7 @@ function updateState() {
     studio.w = 1 / (studio.z || 0.001);
 }
 
+/* --- レンダリングコア --- */
 function render() {
     updateState();
     const d = DICTIONARY[studio.lang];
@@ -183,32 +212,69 @@ function render() {
     
     document.getElementById('chronicle-box').innerHTML = studio.chronicles.map(c => `<p><i>[${c.t}]</i> ${c.m}</p>`).reverse().join('');
     
-    // 待機中輸送体の表示（多言語化）
+    // 待機中輸送体の鼓動
     const incoming = localStorage.getItem('TR_Bridge_to_PORT_A');
     const display = document.getElementById('import-manifest');
     if (incoming) {
         const p = JSON.parse(incoming);
         display.innerHTML = `${d.manifest_capture} FROM: ${p.from}<br>${p.unit}: ${p.amount}`;
-        display.style.color = "#00ff00";
+        display.classList.add('manifest-active');
     } else {
         display.textContent = d.manifest_none;
-        display.style.color = "var(--accent)";
+        display.classList.remove('manifest-active');
     }
+    updateButtonStates();
 }
 
 function renderGrid(id, data) {
-    document.getElementById(id).innerHTML = COLOR_SYSTEM.map(c => `
-        <div class="data-node"><div class="label">${c}</div><div class="value">${(data[c]||0).toFixed(4)}</div></div>
+    const container = document.getElementById(id);
+    container.innerHTML = COLOR_SYSTEM.map(c => `
+        <div class="data-node" id="node-${id}-${c}">
+            <div class="label">${c}</div>
+            <div class="value">${(data[c]||0).toFixed(4)}</div>
+        </div>
     `).join('');
 }
 
-/* アクション */
+/* --- 2. コンテキストへの応答（ボタン制御） --- */
+function updateButtonStates() {
+    const unit = document.getElementById('color-choice').value;
+    const amountInput = parseFloat(document.getElementById('brush-intensity').value) || 0;
+
+    // 積み込み: 数値が正ならOK
+    document.getElementById('btn-vanning').disabled = amountInput <= 0;
+    
+    // 輸送: 倉庫に在庫があるか
+    const hasWarehouse = studio.ports.warehouse.assets[unit] >= amountInput && amountInput > 0;
+    document.getElementById('btn-transport').disabled = !hasWarehouse;
+
+    // 出港: 輸出港に対象資産があるか
+    const hasExport = studio.ports.export.assets[unit] > 0;
+    document.getElementById('btn-sailing').disabled = !hasExport;
+
+    // 入港承認: 信号があるか
+    document.getElementById('btn-arrival').disabled = !localStorage.getItem('TR_Bridge_to_PORT_A');
+
+    // 積み下ろし: 輸入港に何かあるか
+    const hasImport = COLOR_SYSTEM.some(c => studio.ports.import.assets[c] > 0);
+    document.getElementById('btn-devanning').disabled = !hasImport;
+}
+
+/* --- アクションとフラッシュ効果 --- */
+function triggerFlash(cardId) {
+    const el = document.getElementById(cardId);
+    el.classList.remove('flash-update');
+    void el.offsetWidth; // reflow
+    el.classList.add('flash-update');
+}
+
 function vanningAction() {
     const d = DICTIONARY[studio.lang];
     const unit = document.getElementById('color-choice').value;
     const amount = Math.abs(parseFloat(document.getElementById('brush-intensity').value)) || 0;
     studio.ports.warehouse.assets[unit] += amount;
     writeChronicle(`${amount} ${unit} ${d.log_vanning}`);
+    triggerFlash('card-warehouse');
     save(); render();
 }
 
@@ -219,9 +285,9 @@ function transportAction() {
     const result = studio.ports.warehouse.flowTo(studio.ports.export, unit, amount, studio.z);
     if (result.success) {
         writeChronicle(`${amount} ${unit} ${d.log_transport} (${result.friction.toFixed(6)})`);
+        triggerFlash('card-warehouse');
+        triggerFlash('card-export');
         save(); render();
-    } else {
-        alert(d.alert_balance);
     }
 }
 
@@ -230,46 +296,39 @@ function sailingAction() {
     const unit = document.getElementById('color-choice').value;
     const amount = studio.ports.export.assets[unit];
     const dest = document.getElementById('destination-input').value.trim();
-    if (amount <= 0 || !dest) return alert(d.alert_sailing);
-
     studio.ports.export.assets[unit] = 0;
     const manifest = { unit, amount, from: "PORT_A", id: "SIG-A" + Date.now().toString(16).toUpperCase(), z: studio.z };
     localStorage.setItem('TR_Bridge_to_' + dest, JSON.stringify(manifest));
     writeChronicle(`${d.log_sailing_prefix} ${dest} ${d.log_sailing_suffix} ${amount} ${unit}`);
+    triggerFlash('card-export');
     save(); render();
 }
 
 function arrivalAction() {
     const d = DICTIONARY[studio.lang];
     const incoming = localStorage.getItem('TR_Bridge_to_PORT_A');
-    if (!incoming) return alert(d.alert_no_signal);
+    if (!incoming) return;
     const p = JSON.parse(incoming);
     studio.ports.import.assets[p.unit] += p.amount;
     localStorage.removeItem('TR_Bridge_to_PORT_A');
     writeChronicle(`${p.from} ${d.log_arrival} ${p.amount} ${p.unit}`);
+    triggerFlash('card-import');
     save(); render();
 }
 
 function devanningAction() {
     const d = DICTIONARY[studio.lang];
-    let moved = false;
     COLOR_SYSTEM.forEach(c => {
         const amt = studio.ports.import.assets[c];
-        if (amt > 0) {
-            studio.ports.import.flowTo(studio.ports.warehouse, c, amt, studio.z);
-            moved = true;
-        }
+        if (amt > 0) studio.ports.import.flowTo(studio.ports.warehouse, c, amt, studio.z);
     });
-    if (moved) { writeChronicle(d.log_devanning); save(); render(); }
+    writeChronicle(d.log_devanning);
+    triggerFlash('card-import');
+    triggerFlash('card-warehouse');
+    save(); render();
 }
 
-/* 設定と辞書 */
-const TONES = {
-    neutral: { bg: "#0b0e11", surface: "#15191d", accent: "#6c757d", text: "#e9ecef", border: "#2d333b" },
-    logical: { bg: "#050a0f", surface: "#0a141e", accent: "#007bff", text: "#a0d1ff", border: "#1a3a5a" },
-    universal: { bg: "#1a1612", surface: "#2a241e", accent: "#d4a017", text: "#fff4e0", border: "#4a3f35" }
-};
-
+/* --- UI管理 --- */
 const DICTIONARY = {
     en: { 
         super_title: "TABULA RASA", brand_port_a: "PURE PORT A", tab_canvas: "PORT A", tab_book: "ARCHIVE", tab_status: "STATUS", 
@@ -279,33 +338,30 @@ const DICTIONARY = {
         title_book: "ARCHIVE", title_status: "STATUS", title_reset: "CLEAN", btn_reset: "Clean",
         manifest_none: "No vessels in transit", manifest_capture: "[CAPTURED]",
         log_vanning: "vanning to warehouse.", log_transport: "transported to export port.",
-        log_sailing_prefix: "Sailed to", log_sailing_suffix: ":", log_arrival: "arrived:", log_devanning: "Devanning complete.",
-        alert_balance: "Insufficient logical validity (Balance)", alert_sailing: "Sailing conditions incomplete", alert_no_signal: "No signal"
+        log_sailing_prefix: "Sailed to", log_sailing_suffix: ":", log_arrival: "arrived:", log_devanning: "Devanning complete."
     },
     jp: { 
         super_title: "タブラ・ラサ", brand_port_a: "ピュア・ポートA", tab_canvas: "港 A", tab_book: "公文書", tab_status: "状態", 
         title_total: "港 A 全体", title_warehouse: "倉庫", title_export: "輸出港", title_import: "輸入港", 
-        btn_vanning: "積み込み", btn_move_export: "輸送", btn_sailing: "出港", btn_arrival: "捕捉承認", btn_devanning: "積み下ろし", 
+        btn_vanning: "積み込み", btn_move_export: "輸送", btn_sailing: "出港", btn_arrival: "入港承認", btn_devanning: "積み下ろし", 
         label_z: "zの状態", label_w: "wの状態", label_dest: "出港先:",
         title_book: "公文書記録", title_status: "港の状態", title_reset: "港の掃除", btn_reset: "港を掃除する",
         manifest_none: "待機中の輸送体なし", manifest_capture: "[捕捉]",
         log_vanning: "を倉庫へ積み込み。", log_transport: "を輸出港へ輸送。",
-        log_sailing_prefix: "", log_sailing_suffix: "へ向けて出港:", log_arrival: "より到着:", log_devanning: "デヴァンニング完了。",
-        alert_balance: "数理的妥当性が不足しています（残高不足）", alert_sailing: "出港条件不備", alert_no_signal: "信号なし"
+        log_sailing_prefix: "", log_sailing_suffix: "へ向けて出港:", log_arrival: "より到着:", log_devanning: "デヴァンニング完了。"
     }
+};
+
+const TONES = {
+    neutral: { bg: "#0b0e11", surface: "#15191d", accent: "#6c757d", text: "#e9ecef", border: "#2d333b" },
+    logical: { bg: "#050a0f", surface: "#0a141e", accent: "#007bff", text: "#a0d1ff", border: "#1a3a5a" },
+    universal: { bg: "#1a1612", surface: "#2a241e", accent: "#d4a017", text: "#fff4e0", border: "#4a3f35" }
 };
 
 function updateLabels() {
     studio.lang = document.getElementById('ui-lang').value;
     const d = DICTIONARY[studio.lang];
     document.querySelectorAll('[data-key]').forEach(el => { el.textContent = d[el.getAttribute('data-key')]; });
-    
-    // 出港先入力欄の初期値を同期
-    const destInput = document.getElementById('destination-input');
-    if (destInput.value === "PORT_B" || destInput.value === "ポート B") {
-        destInput.value = (studio.lang === 'en') ? "PORT_B" : "PORT_B"; // 必要なら名称を調整
-    }
-
     const sel = document.getElementById('color-choice');
     const currentVal = sel.value;
     sel.innerHTML = ''; COLOR_SYSTEM.forEach(c => sel.add(new Option(c, c)));
